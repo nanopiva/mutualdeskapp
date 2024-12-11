@@ -1,0 +1,32 @@
+.featuresNowGridItem {
+  display: flex;
+  padding: 2.5rem;
+  background: #fff;
+  box-shadow: var(--black);
+  flex-direction: column;
+  -webkit-box-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  border-radius: 0.6rem;
+  color: var(--black);
+  font-size: 1.6rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.featuresNowGridItem:hover {
+  transform: translateY(-10px); /* Efecto de "flotar" */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada en hover */
+}
+
+.featuresNowGridItemTitle {
+  font-weight: bold;
+  padding: 1rem 0;
+  color: var(--black);
+}
+.featuresNowGridItemDescription {
+  font-size: 1.1rem;
+}

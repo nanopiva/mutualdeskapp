@@ -1,0 +1,32 @@
+.projectsContainer {
+  padding: 20px;
+  background-color: var(--white);
+  font-family: "Arial", sans-serif;
+  color: var(--gray);
+}
+
+.groupProjectsContainer,
+.integrantProjectsContainer {
+  margin-top: 20px;
+}
+
+.sectionTitle {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--strong-green);
+  margin-bottom: 15px;
+  border-bottom: 2px solid var(--light-green);
+  padding-bottom: 5px;
+}
+
+.projectCardContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.noProjectsText {
+  font-size: 1rem;
+  color: var(--gray);
+  font-style: italic;
+}

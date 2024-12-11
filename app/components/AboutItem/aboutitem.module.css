@@ -1,0 +1,35 @@
+.AboutitemTextImageContainer {
+  display: flex;
+  margin: 0 2rem;
+  padding: 3rem 0;
+}
+
+.AboutitemTextContainer {
+  flex-basis: 50%;
+  text-align: left;
+  max-width: 700px;
+  line-height: 1.6;
+}
+.AboutitemTitle {
+  font-size: 2rem;
+  padding-bottom: 1rem;
+}
+.AboutitemParagraph {
+  font-size: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.AboutitemImageContainer {
+  flex-basis: 50%;
+  display: flex;
+  justify-content: flex-end;
+}
+.AboutitemImage {
+  margin-right: 15rem;
+  max-width: 100%;
+}

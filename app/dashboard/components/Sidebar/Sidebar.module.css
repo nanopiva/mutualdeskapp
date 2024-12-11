@@ -1,0 +1,178 @@
+/* Contenedor principal del Sidebar */
+.sidebarContainer {
+  height: 100vh; /* Ocupa toda la altura de la pantalla */
+  flex-grow: 1;
+  flex-basis: 200px; /* Ancho inicial del sidebar */
+  max-width: 220px; /* Máximo ancho permitido */
+  background-color: #f2f9f2; /* Mismo fondo que el header */
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1); /* Sombra para separar visualmente */
+  border-right: 1px solid rgba(0, 0, 0, 0.1); /* Línea separadora */
+  padding: 1rem 0; /* Espaciado interno */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem; /* Espaciado entre items */
+}
+
+/* Elementos individuales del Sidebar */
+.itemSidebarContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Espaciado entre el ícono y el texto */
+  padding: 0.8rem 1.5rem; /* Margen interno */
+  width: 100%; /* Ocupa todo el ancho */
+  border-radius: 8px; /* Bordes redondeados */
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
+  cursor: pointer;
+}
+
+/* Fondo interactivo al hover */
+.itemSidebarContainer:hover {
+  background-color: rgba(36, 130, 50, 0.1); /* Verde suave */
+  transform: scale(1.02); /* Leve aumento */
+}
+
+/* Ícono de los items */
+.itemSidebarContainer img {
+  width: 30px;
+  height: 30px;
+  filter: brightness(0.8); /* Menor brillo por defecto */
+  transition: filter 0.3s ease;
+}
+
+.itemSidebarContainer:hover img {
+  filter: brightness(1); /* Ícono más visible al hover */
+}
+
+/* Texto de los items */
+.itemSidebarTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a202c; /* Color oscuro como el título del header */
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
+}
+
+.itemSidebarContainer:hover .itemSidebarTitle {
+  color: #248232; /* Verde destacado al hover */
+}
+
+/* Botón para expandir/cerrar acordeón */
+.accordionToggle {
+  cursor: pointer;
+}
+
+/* Contenido del acordeón */
+.accordionContent {
+  padding-left: 2rem; /* Indentación para subelementos */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Botón de crear grupo */
+.createGroupButton {
+  padding: 0.5rem 1rem;
+  background-color: #248232;
+  color: white;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.createGroupButton:hover {
+  background-color: #1e6b29;
+}
+
+/* Lista de grupos dentro del acordeón */
+.groupList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.groupItem {
+  font-size: 14px;
+  color: #1a202c;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  background-color: #f4f4f4;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.groupItem:hover {
+  background-color: #eaf4ea;
+}
+
+/* Botón principal de Grupos */
+.groupButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  background-color: #f7f9f9;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.groupButton:hover {
+  background-color: rgba(36, 130, 50, 0.1); /* Verde suave */
+}
+
+.arrowButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+
+.arrowIcon {
+  transition: transform 0.3s ease;
+}
+
+.arrowIconOpen {
+  transform: rotate(180deg);
+}
+
+/* Dropdown desplegable */
+.groupsDropdown {
+  margin-top: 0.5rem;
+  padding-left: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+/* Botón para crear grupo */
+.createGroupButton {
+  display: block;
+  text-align: left;
+  color: #248232;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 0.6rem 1rem;
+  background-color: #eaf4ea;
+  border-radius: 6px;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.createGroupButton:hover {
+  background-color: #d9f2e6;
+  color: #1e6b29;
+}

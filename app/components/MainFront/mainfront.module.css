@@ -1,0 +1,116 @@
+.mainfrontContainer {
+  display: flex;
+  flex: 1 1;
+  padding: 0px 3rem;
+  padding-top: 3rem;
+  position: relative;
+  max-width: 130em;
+  width: 100%;
+  margin: 0px auto;
+}
+.mainfrontDescription {
+  width: 50%;
+}
+.mainfrontImage {
+  width: 50%;
+}
+.subtitleDescription {
+  color: var(--dark-blue);
+  margin-bottom: 2rem;
+  display: block;
+  font-size: 1.3rem;
+  letter-spacing: 0.02em;
+  font-weight: bold;
+  line-height: 0;
+  text-transform: uppercase;
+}
+.subtitleDescription::before {
+  position: relative;
+  bottom: -0.1em;
+  content: "";
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  background-color: var(--strong-green);
+  line-height: 0;
+  margin-right: 1em;
+}
+.titleDescription {
+  color: var(--dark-blue);
+  font-size: 4.5rem;
+  font-weight: bold;
+  line-height: 1.1;
+  margin-bottom: 4rem;
+  letter-spacing: -0.03em;
+}
+.textDescription {
+  color: var(--gray);
+  font-size: 1.1rem;
+  opacity: 0.8;
+  line-height: 1.6;
+}
+
+.loginContainerDescription {
+  margin-top: 4rem;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.loginContainerDescription > :not(:last-child) {
+  margin-right: 2rem;
+}
+.buttonDescription {
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+  background: var(--strong-green);
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  color: #fff;
+  text-transform: uppercase;
+  font-family: var(--font);
+  font-weight: bold;
+  border-radius: 0.4rem;
+  border: 2px solid var(--strong-green);
+  transition: transform 0.3s;
+  backface-visibility: hidden;
+  will-change: transform;
+  cursor: pointer;
+}
+.loginContainerDescription > :last-child {
+  border-color: var(--light-green);
+  background-color: var(--white);
+  color: var(--black);
+}
+
+.loginContainerDescription > :not(:last-child):hover {
+  transform: scale(1.02);
+  background-color: var(--light-green);
+  border-color: var(--light-green);
+}
+
+/* Botón Sign Up */
+.signupButtonDescription {
+  border-color: var(--light-green);
+  background-color: var(--white);
+  color: var(--black);
+}
+
+.signupButtonDescription:hover {
+  transform: scale(1.02);
+  background-color: var(--light-green);
+  color: var(--white);
+  border-color: var(--light-green);
+}
+
+.mainfrontImageContainer {
+  display: flex;
+  flex: 1 1 0;
+  -webkit-box-pack: end;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.mainfrontImage {
+  max-width: 50rem;
+}

@@ -1,0 +1,64 @@
+.groupDetailsContainer {
+  padding: 20px;
+  background-color: #ffffff;
+  font-family: "Arial", sans-serif;
+  color: #1f1f1f;
+  line-height: 1.6;
+}
+
+.groupDetail {
+  margin-bottom: 20px;
+}
+
+.groupName {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #004d40; /* Dark green */
+  margin-bottom: 10px;
+}
+
+.groupDescription {
+  font-size: 1.2rem;
+  color: #333333;
+  margin-bottom: 10px;
+}
+
+.groupMeta {
+  font-size: 0.95rem;
+  color: #555555;
+}
+
+.sectionTitle {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #00695c; /* Medium green */
+  margin-top: 30px;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #e0f2f1; /* Light green underline */
+  padding-bottom: 5px;
+}
+
+.noData {
+  font-size: 1rem;
+  color: #999999;
+  font-style: italic;
+}
+
+.groupMembersData {
+  margin-bottom: 10px;
+}
+
+.groupMembersData p {
+  font-size: 1rem;
+  margin: 5px 0;
+  color: #2e7d32; /* Subtle green */
+}
+
+.groupProjectsData {
+  margin-bottom: 10px;
+}
+
+.groupProjectsData p {
+  font-size: 1rem;
+  margin: 5px 0;
+}

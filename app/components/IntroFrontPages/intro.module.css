@@ -1,0 +1,22 @@
+.introContainer {
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  background: var(--light-green);
+  min-height: 27rem;
+}
+.titleIntroContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.titleIntro {
+  font-size: 4rem;
+}
+.subtitleIntro {
+  font-size: 1.2rem;
+}

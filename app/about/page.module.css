@@ -1,0 +1,4 @@
+.strongWord {
+  font-weight: bold;
+  color: var(--strong-green);
+}

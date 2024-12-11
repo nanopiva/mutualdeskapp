@@ -1,0 +1,11 @@
+.mainContent {
+  padding: 16px;
+  width: 100%;
+}
+.sidebarAndMainContainer {
+  display: flex;
+}
+.mainContentContainer {
+  flex-grow: 5;
+  padding: 1rem;
+}

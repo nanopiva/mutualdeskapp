@@ -1,0 +1,28 @@
+.introFeatures {
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  background: var(--light-green);
+  min-height: 27rem;
+}
+.titleContainerFeatures {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.titleFeatures {
+  font-size: 4rem;
+}
+.subtitleFeatures {
+  font-size: 1.2rem;
+}
+
+.titleFeaturesIncoming {
+  padding: 4rem 0;
+  text-align: center;
+  font-size: 2rem;
+}

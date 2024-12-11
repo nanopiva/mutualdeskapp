@@ -1,0 +1,121 @@
+.profilePage {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: var(--white);
+  border-radius: 8px;
+}
+
+.pageTitle {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--black);
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 0.9rem;
+  color: var(--dark-gray);
+}
+
+.input {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid var(--gray);
+  border-radius: 6px;
+  width: 100%;
+}
+
+.emailDisplay {
+  padding: 10px;
+  font-size: 1rem;
+  background-color: var(--light-gray);
+  border-radius: 6px;
+  color: var(--dark-gray);
+}
+
+.submitButton {
+  padding: 12px 20px;
+  background-color: var(--strong-green);
+  color: var(--white);
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+.submitButton:hover {
+  background-color: var(--light-green);
+}
+
+/* Avatar styling */
+.formGroupAvatar {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.avatarLabel {
+  display: inline-block;
+  cursor: pointer;
+  position: relative;
+}
+
+.avatarButton {
+  border: none;
+  background: transparent;
+  padding: 0;
+  display: inline-block;
+  position: relative;
+}
+
+.avatarOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Gris translúcido */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 50%; /* Aseguramos que el contenedor del overlay tenga bordes redondeados */
+}
+
+.avatarButton:hover .avatarOverlay {
+  opacity: 1;
+}
+
+.editMessage,
+.editIcon {
+  color: white;
+  font-size: 14px;
+  text-align: center;
+}
+
+.editMessage {
+  display: block;
+  margin-bottom: 5px; /* Separar el mensaje del ícono */
+}
+
+.uploadProfilePictureInput {
+  display: none; /* Oculta el input de archivo */
+}
