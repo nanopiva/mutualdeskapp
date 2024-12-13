@@ -6,9 +6,9 @@ import ProjectCard from "../../components/ProjectCard/ProjectCard";
 export default async function GroupPage({
   params,
 }: {
-  params: { groupId: string };
+  params: { groupId?: string };
 }) {
-  const { groupId } = await params;
+  const { groupId } = params;
 
   async function getGroupInfo() {
     const supabase = await createClient();

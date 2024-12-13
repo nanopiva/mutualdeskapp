@@ -5,6 +5,6 @@ export default async function Project({
 }: {
   params: { projectId: string };
 }) {
-  const { projectId } = await params;
+  const { projectId } = params;
   return <Editor projectId={projectId} />;
 }
