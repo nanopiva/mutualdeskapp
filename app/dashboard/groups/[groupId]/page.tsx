@@ -6,7 +6,7 @@ import ProjectCard from "../../components/ProjectCard/ProjectCard";
 export default async function GroupPage({
   params,
 }: {
-  params: { groupId?: string };
+  params: { groupId: string };
 }) {
   const { groupId } = params;
 
