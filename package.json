@@ -6,6 +6,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@lexical/react": "^0.21.0",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-checkbox": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.2",
@@ -21,9 +22,10 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "geist": "^1.2.1",
+    "lexical": "^0.21.0",
     "lucide-react": "^0.436.0",
     "mailtrap": "^3.4.0",
-    "next": "latest",
+    "next": "^15.1.0",
     "next-themes": "^0.3.0",
     "prettier": "^3.3.3",
     "react": "18.2.0",

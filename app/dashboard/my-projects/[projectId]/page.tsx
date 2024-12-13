@@ -1,3 +1,5 @@
+import Editor from "../../components/Editor/Editor";
+
 export default function Project() {
-  return <h1>Te encontras en un proyecto</h1>;
+  return <Editor />;
 }
