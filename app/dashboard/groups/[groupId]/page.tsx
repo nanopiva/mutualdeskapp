@@ -3,12 +3,11 @@ import { getUserById } from "@/app/actions"; // Importa la función de actions.t
 import styles from "./page.module.css";
 import ProjectCard from "../../components/ProjectCard/ProjectCard";
 
-export default async function GroupPage({
-  params,
-}: {
-  params: { groupId: string };
-}) {
-  const { groupId } = params;
+type Params = Promise<{ groupId: string }>;
+
+export default async function GroupPage(props: { params: Params }) {
+  const params = await props.params;
+  const groupId = params.groupId;
 
   async function getGroupInfo() {
     const supabase = await createClient();
