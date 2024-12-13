@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { ProjectCard } from "../components/ProjectCard/ProjectCard";
+import ProjectCard from "../components/ProjectCard/ProjectCard";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import styles from "./page.module.css";

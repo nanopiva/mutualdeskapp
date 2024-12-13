@@ -91,7 +91,7 @@ export default async function GroupPage({
     const { data, error } = await supabase
       .from("projects")
       .select(
-        `id, name, description, is_public, author_id, created_at, updated_at`
+        `id, name, description, is_public, author_id, created_at, updated_at,group_id`
       )
       .eq("group_id", groupId);
 
@@ -108,6 +108,7 @@ export default async function GroupPage({
       projectAuthor: project.author_id,
       projectCreated: project.created_at,
       projectLastUpdated: project.updated_at,
+      projectGroupId: project.group_id,
     }));
   }
 
@@ -185,8 +186,10 @@ export default async function GroupPage({
         groupProjects.map((project) => (
           <div key={project.id} className={styles.groupProjectsData}>
             <ProjectCard
-              address={`/my-projects/${project.id}`}
               name={project.projectName}
+              id={project.id}
+              role="random"
+              isGroup={true}
             />
           </div>
         ))

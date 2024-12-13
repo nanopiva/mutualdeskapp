@@ -12,7 +12,12 @@ interface ProjectCardProps {
   isGroup: boolean;
 }
 
-export function ProjectCard({ id, name, role, isGroup }: ProjectCardProps) {
+export default function ProjectCard({
+  id,
+  name,
+  role,
+  isGroup,
+}: ProjectCardProps) {
   const capitalizedRole = role.charAt(0).toUpperCase() + role.slice(1);
 
   return (
