@@ -29,6 +29,7 @@ import Toolbar from "./Toolbar";
 import "./editorStyles.css";
 
 import { parseAllowedColor, parseAllowedFontSize } from "./styleConfig";
+import LoadText from "./LoadText";
 
 const placeholder = "Enter some rich text...";
 
@@ -139,13 +140,19 @@ const editorConfig = {
     throw error;
   },
   theme: ExampleTheme,
+  editable: false,
 };
 
-export default function Editor() {
+interface EditorProps {
+  projectId: string;
+}
+
+export default function Editor({ projectId }: EditorProps) {
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <div className="editor-container">
-        <Toolbar />
+        <LoadText projectId={projectId} />
+        <Toolbar projectId={projectId} />
         <div className="editor-inner">
           <RichTextPlugin
             contentEditable={

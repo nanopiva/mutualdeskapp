@@ -497,45 +497,47 @@ export const createProject = async (formData: FormData) => {
   }
 
   //En caso de que sea un proyecto en grupo, buscaremos a los integrantes y el rol que tengan en el grupo y los añadimos al proyecto con ese rol.
-  const { data: otherMembers, error: otherMembersError } = await supabase
-    .from("group_members")
-    .select("user_id,role")
-    .eq("group_id", groupId)
-    .neq("role", "admin");
+  if (groupId != null) {
+    const { data: otherMembers, error: otherMembersError } = await supabase
+      .from("group_members")
+      .select("user_id,role")
+      .eq("group_id", groupId)
+      .neq("role", "admin");
 
-  if (otherMembersError) {
-    console.error("Error obteniendo al resto de los miembros");
-    return;
-  }
-  try {
-    const insertPromises = otherMembers.map(async (member) => {
-      const { error: insertError } = await supabase
-        .from("project_members")
-        .insert({
-          project_id: projectId, // ID del proyecto
-          user_id: member.user_id, // ID del usuario
-          role: member.role,
-        });
+    if (otherMembersError) {
+      console.error("Error obteniendo al resto de los miembros");
+      return;
+    }
+    try {
+      const insertPromises = otherMembers.map(async (member) => {
+        const { error: insertError } = await supabase
+          .from("project_members")
+          .insert({
+            project_id: projectId, // ID del proyecto
+            user_id: member.user_id, // ID del usuario
+            role: member.role,
+          });
 
-      if (insertError) {
-        console.error(
-          `Error al agregar usuario ${user.id} al proyecto:`,
-          insertError
-        );
-      }
-    });
+        if (insertError) {
+          console.error(
+            `Error al agregar usuario ${user.id} al proyecto:`,
+            insertError
+          );
+        }
+      });
 
-    await Promise.all(insertPromises);
+      await Promise.all(insertPromises);
 
-    console.log(
-      "Todos los usuarios fueron agregados al proyecto correctamente."
-    );
-  } catch (error) {
-    console.error(
-      "Error al agregar usuarios a la tabla project_members:",
-      error
-    );
-    throw new Error("Error al agregar usuarios al proyecto.");
+      console.log(
+        "Todos los usuarios fueron agregados al proyecto correctamente."
+      );
+    } catch (error) {
+      console.error(
+        "Error al agregar usuarios a la tabla project_members:",
+        error
+      );
+      throw new Error("Error al agregar usuarios al proyecto.");
+    }
   }
 };
 
@@ -554,4 +556,34 @@ export const getUserById = async (userId: string) => {
   }
 
   return userData;
+};
+
+export const saveProjectInDatabase = async (
+  projectId: string,
+  newContent: JSON
+) => {
+  const supabase = await createClient();
+
+  const { error: updateError } = await supabase
+    .from("projects")
+    .update({ content: newContent })
+    .eq("id", projectId);
+  if (updateError) {
+    console.error("error insertando nuevo contenido", updateError);
+    return;
+  }
+};
+
+export const loadProjectFromDatabase = async (projectId: string) => {
+  const supabase = await createClient();
+
+  const { data: contentLoaded, error: loadProjectError } = await supabase
+    .from("projects")
+    .select(`content`)
+    .eq("id", projectId);
+  if (loadProjectError) {
+    console.error("error obteniendo contenido de database", loadProjectError);
+    return;
+  }
+  return contentLoaded;
 };

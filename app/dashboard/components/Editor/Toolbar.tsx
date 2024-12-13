@@ -20,14 +20,19 @@ import {
   UNDO_COMMAND,
 } from "lexical";
 import { useCallback, useEffect, useRef, useState } from "react";
-
+import { useDebouncedCallback } from "use-debounce";
+import { saveProjectInDatabase } from "@/app/actions";
 const LowPriority = 1;
 
 function Divider() {
   return <div className="divider" />;
 }
 
-export default function ToolbarPlugin() {
+interface ToolbarProps {
+  projectId: string;
+}
+
+export default function ToolbarPlugin({ projectId }: ToolbarProps) {
   const [editor] = useLexicalComposerContext();
   const toolbarRef = useRef(null);
   const [canUndo, setCanUndo] = useState(false);
@@ -48,13 +53,24 @@ export default function ToolbarPlugin() {
     }
   }, []);
 
+  const handleSave = useDebouncedCallback((content: any, projectId: string) => {
+    console.log(content);
+    saveProjectInDatabase(projectId, content);
+  }, 200);
+
   useEffect(() => {
     return mergeRegister(
-      editor.registerUpdateListener(({ editorState }) => {
-        editorState.read(() => {
-          $updateToolbar();
-        });
-      }),
+      editor.registerUpdateListener(
+        ({ editorState, dirtyElements, dirtyLeaves }) => {
+          editorState.read(() => {
+            $updateToolbar();
+          });
+          if (dirtyElements.size === 0 && dirtyLeaves.size === 0) {
+            return;
+          }
+          handleSave(JSON.stringify(editorState), projectId);
+        }
+      ),
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
         (_payload, _newEditor) => {

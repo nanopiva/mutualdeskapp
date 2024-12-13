@@ -1,37 +1,95 @@
 .card {
-  width: 150px;
-  height: 220px;
-  background-color: var(--light-green);
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out;
-  cursor: pointer;
-}
-
-.icon {
-  font-size: 48px;
-  color: var(--strong-green);
-}
-
-.text {
-  font-size: 16px;
-  color: var(--strong-green);
-  margin-top: 8px;
-  text-align: center;
+  border: 1px solid var(--gray);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--white);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+  cursor: pointer; /* Facilita la percepción de interactividad */
 }
 
 .card:hover {
-  background-color: var(--strong-green);
-  color: var(--white);
-  transform: scale(1.05);
-  box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: scale(1.02); /* Animación suave */
 }
 
-.card:hover .icon,
-.card:hover .text {
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: var(--white);
+  border-bottom: 1px solid var(--light-green);
+}
+
+.cardTitle {
+  font-size: 1.4rem; /* Título más destacado */
+  font-weight: 600;
+  color: var(--gray);
+}
+
+.cardContent {
+  padding: 16px;
+}
+
+.badgeContainer {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 8px; /* Separación entre badges */
+}
+
+.badge {
+  padding: 6px 12px; /* Badge más espacioso */
+  border-radius: 4px;
+  font-size: 0.9rem; /* Tamaño ligeramente mayor */
+  display: inline-flex; /* Permite añadir iconos fácilmente */
+  align-items: center;
+  gap: 4px; /* Espacio entre el texto y el icono */
+}
+
+.groupBadge {
+  background-color: rgba(var(--strong-green-rgb), 0.1);
+  color: var(--strong-green);
+}
+
+.individualBadge {
+  background-color: rgba(var(--light-green-rgb), 0.1);
+  color: var(--light-green);
+}
+
+.roleBadge {
+  border: 1px solid var(--gray);
+  color: var(--gray);
+}
+
+.button {
+  display: block;
+  width: 100%;
+  padding: 10px 16px; /* Botón ligeramente más grande */
+  background-color: var(--white);
+  color: var(--strong-green);
+  text-align: center;
+  text-decoration: none;
+  border-radius: 4px;
+  border: 1px solid var(--strong-green);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    transform 0.2s ease;
+}
+
+.button:hover {
+  background-color: var(--strong-green);
   color: var(--white);
+  transform: scale(1.02); /* Pequeña animación al hover */
+}
+
+.cardClickable {
+  cursor: pointer; /* Indicador de interactividad */
+}
+
+.cardClickable:hover {
+  background-color: var(--light-gray); /* Sutil cambio de fondo al hover */
 }
