@@ -30,6 +30,7 @@ import "./editorStyles.css";
 
 import { parseAllowedColor, parseAllowedFontSize } from "./styleConfig";
 import LoadText from "./LoadText";
+import RealtimePlugin from "./RealtimePlugin";
 
 const placeholder = "Enter some rich text...";
 

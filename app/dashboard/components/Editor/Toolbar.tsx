@@ -54,9 +54,12 @@ export default function ToolbarPlugin({ projectId }: ToolbarProps) {
   }, []);
 
   const handleSave = useDebouncedCallback((content: any, projectId: string) => {
-    console.log(content);
-    saveProjectInDatabase(projectId, content);
-  }, 200);
+    try {
+      saveProjectInDatabase(projectId, content);
+    } catch (error) {
+      console.error("Error al guardar el proyecto:", error);
+    }
+  }, 100);
 
   useEffect(() => {
     return mergeRegister(

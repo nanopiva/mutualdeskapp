@@ -564,16 +564,33 @@ export const saveProjectInDatabase = async (
 ) => {
   const supabase = await createClient();
 
+  // Obtener el contenido actual para evitar actualizaciones innecesarias
+  const { data: existingData, error: fetchError } = await supabase
+    .from("projects")
+    .select("content")
+    .eq("id", projectId)
+    .single();
+
+  if (fetchError) {
+    console.error("Error al obtener contenido actual:", fetchError);
+    return;
+  }
+
+  if (JSON.stringify(existingData.content) === JSON.stringify(newContent)) {
+    // No actualizar si el contenido es idéntico
+    return;
+  }
+
   const { error: updateError } = await supabase
     .from("projects")
     .update({ content: newContent })
     .eq("id", projectId);
+
   if (updateError) {
-    console.error("error insertando nuevo contenido", updateError);
+    console.error("Error insertando nuevo contenido", updateError);
     return;
   }
 };
-
 export const loadProjectFromDatabase = async (projectId: string) => {
   const supabase = await createClient();
 
@@ -586,4 +603,32 @@ export const loadProjectFromDatabase = async (projectId: string) => {
     return;
   }
   return contentLoaded;
+};
+
+export const listenToRealtimeUpdates = async (
+  projectId: string,
+  onUpdate: (content: any) => void
+) => {
+  const supabase = await createClient();
+  const subscription = supabase
+    .channel("realtime:projects")
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "projects",
+        filter: `id=eq.${projectId}`,
+      },
+      (payload) => {
+        console.log("Cambio detectado en Realtime:", payload);
+        onUpdate(payload.new.content);
+      }
+    )
+    .subscribe();
+
+  // Devolver la función de limpieza directamente
+  return () => {
+    supabase.removeChannel(subscription);
+  };
 };
