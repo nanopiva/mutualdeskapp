@@ -32,16 +32,7 @@ export default function LoadText({ projectId }: LoadTextProps) {
           if (isContentEmpty) {
             // Si el contenido es vacío, crea un estado predeterminado
             const defaultState = editor.parseEditorState(
-              JSON.stringify({
-                root: {
-                  children: [],
-                  direction: "ltr",
-                  format: "",
-                  indent: 0,
-                  type: "root",
-                  version: 1,
-                },
-              })
+              '{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
             );
             editor.setEditorState(defaultState);
           } else {
@@ -61,30 +52,30 @@ export default function LoadText({ projectId }: LoadTextProps) {
       loadEditorState();
       hasLoaded.current = true;
     }
-    const subscription = supabase
-      .channel("realtime:projects")
+
+    const supabase = createClient();
+
+    const handleEditorRealtime = async (payload: any) => {
+      const newEditor = payload.new.content;
+      console.log("ContentNuevo", newEditor);
+      const newStateRealtime = editor.parseEditorState(newEditor);
+      editor.setEditorState(newStateRealtime);
+    };
+    const channel = supabase
+      .channel("projects-content-inserts") // Nombre único para el canal
       .on(
         "postgres_changes",
         {
           event: "UPDATE",
-          schema: "public",
+          schema: "public", // Asegúrate de usar el esquema correcto
           table: "projects",
-          filter: `id=eq.${projectId}`,
         },
-        (payload) => {
-          console.log("Cambio detectado en Realtime:", payload);
-          const updatedContent = payload.new.content;
-          const newState = editor.parseEditorState(updatedContent);
-          editor.update(() => {
-            editor.setEditorState(newState); // Solo actualizar el estado del editor
-          });
-        }
+        handleEditorRealtime
       )
       .subscribe();
 
     return () => {
-      // Limpiar la suscripción cuando el componente se desmonte
-      supabase.removeChannel(subscription);
+      supabase.removeChannel(channel); // Limpia el canal al desmontar
     };
   }, [editor, projectId]);
 
