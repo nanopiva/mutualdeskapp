@@ -53,27 +53,13 @@ export default function ToolbarPlugin({ projectId }: ToolbarProps) {
     }
   }, []);
 
-  const handleSave = useDebouncedCallback((content: any, projectId: string) => {
-    try {
-      saveProjectInDatabase(projectId, content);
-    } catch (error) {
-      console.error("Error al guardar el proyecto:", error);
-    }
-  }, 100);
-
   useEffect(() => {
     return mergeRegister(
-      editor.registerUpdateListener(
-        ({ editorState, dirtyElements, dirtyLeaves }) => {
-          editorState.read(() => {
-            $updateToolbar();
-          });
-          if (dirtyElements.size === 0 && dirtyLeaves.size === 0) {
-            return;
-          }
-          handleSave(JSON.stringify(editorState), projectId);
-        }
-      ),
+      editor.registerUpdateListener(({ editorState }) => {
+        editorState.read(() => {
+          $updateToolbar();
+        });
+      }),
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
         (_payload, _newEditor) => {

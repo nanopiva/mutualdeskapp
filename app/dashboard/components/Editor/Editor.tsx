@@ -30,7 +30,6 @@ import "./editorStyles.css";
 
 import { parseAllowedColor, parseAllowedFontSize } from "./styleConfig";
 import LoadText from "./LoadText";
-import RealtimePlugin from "./RealtimePlugin";
 
 const placeholder = "Enter some rich text...";
 
@@ -146,13 +145,14 @@ const editorConfig = {
 
 interface EditorProps {
   projectId: string;
+  userId: string | null | undefined;
 }
 
-export default function Editor({ projectId }: EditorProps) {
+export default function Editor({ projectId,userId }: EditorProps) {
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <div className="editor-container">
-        <LoadText projectId={projectId} />
+        <LoadText projectId={projectId} userId={userId} />
         <Toolbar projectId={projectId} />
         <div className="editor-inner">
           <RichTextPlugin

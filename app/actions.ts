@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { UUID } from "crypto";
+import { SerializedEditorState } from "lexical";
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -560,7 +561,7 @@ export const getUserById = async (userId: string) => {
 
 export const saveProjectInDatabase = async (
   projectId: string,
-  newContent: JSON
+  newContent: JSON | SerializedEditorState
 ) => {
   const supabase = await createClient();
 
@@ -605,30 +606,17 @@ export const loadProjectFromDatabase = async (projectId: string) => {
   return contentLoaded;
 };
 
-export const listenToRealtimeUpdates = async (
-  projectId: string,
-  onUpdate: (content: any) => void
-) => {
+export const getActualUserId = async () => {
   const supabase = await createClient();
-  const subscription = supabase
-    .channel("realtime:projects")
-    .on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "projects",
-        filter: `id=eq.${projectId}`,
-      },
-      (payload) => {
-        console.log("Cambio detectado en Realtime:", payload);
-        onUpdate(payload.new.content);
-      }
-    )
-    .subscribe();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  // Devolver la función de limpieza directamente
-  return () => {
-    supabase.removeChannel(subscription);
-  };
+  if (userError) {
+    console.error("Error obteniendo el usuario actual");
+    return null;
+  }
+  const userId = user?.id;
+  return userId;
 };
