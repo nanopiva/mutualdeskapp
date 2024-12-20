@@ -2,7 +2,7 @@ import styles from "./mainfront.module.css";
 import Image from "next/image";
 import mainImage from "../../../public/frontImage.jpg";
 
-export default function mainfront() {
+export default function Mainfront() {
   return (
     <div className={styles.mainfrontContainer}>
       <div className={styles.mainfrontDescription}>
@@ -36,9 +36,6 @@ export default function mainfront() {
           className={styles.mainfrontImage}
           src={mainImage}
           alt="Picture of the author"
-          // blurDataURL="data:..." automatically provided
-          // placeholder="blur" // Optional blur-up while loading
-          priority
         />
       </div>
     </div>
