@@ -1,27 +1,42 @@
 .mainfrontContainer {
   display: flex;
-  flex: 1 1;
-  padding: 0px 3rem;
-  padding-top: 3rem;
+  flex-wrap: wrap;
+  padding: 0px 1.5rem;
   position: relative;
-  max-width: 130em;
-  width: 100%;
-  margin: 0px auto;
+  max-width: 100%;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.mainfrontDescription,
+.mainfrontImageContainer {
+  width: 48%;
+  min-width: 300px;
 }
 .mainfrontDescription {
-  width: 50%;
+  flex-basis: 55%;
 }
+.mainfrontImageContainer {
+  display: flex;
+  flex-basis: 45%;
+  align-items: center;
+}
+
 .mainfrontImage {
-  width: 50%;
+  width: 100%;
+  max-width: 40rem;
+  margin: 3rem auto;
+  height: 550px;
 }
+
 .subtitleDescription {
   color: var(--dark-blue);
-  margin-bottom: 2rem;
+  margin: 3rem 0;
   display: block;
   font-size: 1.3rem;
   letter-spacing: 0.02em;
   font-weight: bold;
-  line-height: 0;
+  line-height: 1.3;
   text-transform: uppercase;
 }
 .subtitleDescription::before {
@@ -35,6 +50,7 @@
   line-height: 0;
   margin-right: 1em;
 }
+
 .titleDescription {
   color: var(--dark-blue);
   font-size: 4.5rem;
@@ -43,6 +59,7 @@
   margin-bottom: 4rem;
   letter-spacing: -0.03em;
 }
+
 .textDescription {
   color: var(--gray);
   font-size: 1.1rem;
@@ -54,11 +71,9 @@
   margin-top: 4rem;
   display: flex;
   flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.loginContainerDescription > :not(:last-child) {
-  margin-right: 2rem;
-}
 .buttonDescription {
   display: inline-block;
   text-decoration: none;
@@ -77,25 +92,11 @@
   will-change: transform;
   cursor: pointer;
 }
-.loginContainerDescription > :last-child {
-  border-color: var(--light-green);
-  background-color: var(--white);
-  color: var(--black);
-}
-
-.loginContainerDescription > :not(:last-child):hover {
-  transform: scale(1.02);
-  background-color: var(--light-green);
-  border-color: var(--light-green);
-}
-
-/* Botón Sign Up */
 .signupButtonDescription {
   border-color: var(--light-green);
   background-color: var(--white);
   color: var(--black);
 }
-
 .signupButtonDescription:hover {
   transform: scale(1.02);
   background-color: var(--light-green);
@@ -103,14 +104,72 @@
   border-color: var(--light-green);
 }
 
-.mainfrontImageContainer {
-  display: flex;
-  flex: 1 1 0;
-  -webkit-box-pack: end;
-  justify-content: flex-end;
-  align-items: flex-start;
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .mainfrontContainer {
+    padding: 0 1rem;
+  }
+
+  .mainfrontDescription,
+  .mainfrontImageContainer {
+    width: 100%;
+  }
+
+  .titleDescription {
+    font-size: 3.5rem;
+    margin-bottom: 3rem;
+  }
 }
 
-.mainfrontImage {
-  max-width: 50rem;
+@media (max-width: 965px) {
+  .mainfrontContainer {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .mainfrontImage {
+    max-width: 80%;
+  }
+
+  .titleDescription {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .textDescription {
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+
+  .loginContainerDescription {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+  }
+
+  .buttonDescription {
+    width: 70%;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mainfrontContainer {
+    padding: 0 0.5rem;
+  }
+
+  .titleDescription {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .textDescription {
+    font-size: 0.9rem;
+  }
+
+  .buttonDescription {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+  }
 }

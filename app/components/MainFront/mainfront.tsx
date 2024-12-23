@@ -35,7 +35,7 @@ export default function Mainfront() {
         <Image
           className={styles.mainfrontImage}
           src={mainImage}
-          alt="Picture of the author"
+          alt="Ilustrative picture"
         />
       </div>
     </div>

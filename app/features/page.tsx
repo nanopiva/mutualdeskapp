@@ -6,8 +6,9 @@ import IntroFrontPages from "../components/IntroFrontPages/intro";
 
 export default function Features() {
   return (
-    <div className={styles.featuresCcontainer}>
-      <Header />
+    <main className={styles.featuresContainer} style={{ maxWidth: "unset" }}>
+      {" "}
+      {/* Update: Removed max-width restriction */}
       <IntroFrontPages
         title="Features"
         subtitle="What we have and what is coming soon"
@@ -15,6 +16,6 @@ export default function Features() {
       <FeaturesNow />
       <h2 className={styles.titleFeaturesIncoming}>Features incoming</h2>
       <FeaturesIncoming />
-    </div>
+    </main>
   );
 }

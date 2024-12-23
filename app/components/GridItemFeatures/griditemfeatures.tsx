@@ -1,10 +1,13 @@
+import Image, { ImageProps } from "next/image";
 import styles from "./griditemfeatures.module.css";
-import Image, { StaticImageData } from "next/image";
+import { StaticImport } from "next/dist/shared/lib/get-img-props";
+
 interface GridItemFeaturesProps {
-  image: StaticImageData;
+  image: StaticImport;
   alt: string;
   title: string;
   description: string;
+  imageSize?: number;
 }
 
 export default function GridItemFeatures({
@@ -12,6 +15,7 @@ export default function GridItemFeatures({
   alt,
   title,
   description,
+  imageSize = 150,
 }: GridItemFeaturesProps) {
   return (
     <div className={styles.featuresNowGridItem}>
@@ -19,8 +23,8 @@ export default function GridItemFeatures({
         className={styles.featuresNowGridItemImage}
         src={image}
         alt={alt}
-        width={200}
-        height={200}
+        width={imageSize}
+        height={imageSize}
       />
       <span className={styles.featuresNowGridItemTitle}>{title}</span>
       <p className={styles.featuresNowGridItemDescription}>{description}</p>

@@ -17,24 +17,28 @@ export default function FeaturesNow() {
           alt="Edit icon"
           title="Live edition"
           description="You can edit your documents simultaneously with members of your group"
+          imageSize={100}
         />
         <GridItemFeatures
           image={ChatIcon}
           alt="Chat icon"
           title="Chat"
           description="A chat is provided to communicate with any member of the group"
+          imageSize={100}
         />
         <GridItemFeatures
           image={ShareIcon}
           alt="Share icon"
           title="Share your work easily"
           description="You can invite any person to edit or watch your work only sending them a link"
+          imageSize={100}
         />
         <GridItemFeatures
           image={SaveIcon}
           alt="Save icon"
           title="Cloud save"
           description="Save your work in the cloud to not loss any progress made"
+          imageSize={100}
         />
       </div>
     </div>

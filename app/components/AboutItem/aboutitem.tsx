@@ -1,6 +1,7 @@
 import styles from "./aboutitem.module.css";
 import Image, { StaticImageData } from "next/image";
 import type { JSX } from "react";
+
 interface AboutItemProps {
   image: StaticImageData;
   alt: string;
@@ -8,23 +9,23 @@ interface AboutItemProps {
   description: JSX.Element;
 }
 
-export default function OurGoal({
+export default function AboutItem({
   image,
   alt,
   title,
   description,
 }: AboutItemProps) {
   return (
-    <div className={styles.AboutitemContainer}>
-      <div className={styles.AboutitemTextImageContainer}>
-        <div className={styles.AboutitemTextContainer}>
-          <h2 className={styles.AboutitemTitle}>{title}</h2>
-          <div className={styles.AboutitemParagraph}>{description}</div>
+    <section className={styles.aboutItemContainer}>
+      <div className={styles.aboutItemContent}>
+        <div className={styles.aboutItemText}>
+          <h2 className={styles.aboutItemTitle}>{title}</h2>
+          <div className={styles.aboutItemDescription}>{description}</div>
         </div>
-        <div className={styles.AboutitemImageContainer}>
-          <Image className={styles.AboutitemImage} src={image} alt={alt} />
+        <div className={styles.aboutItemImageWrapper}>
+          <Image className={styles.aboutItemImage} src={image} alt={alt} />
         </div>
       </div>
-    </div>
+    </section>
   );
 }

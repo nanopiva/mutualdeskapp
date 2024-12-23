@@ -12,12 +12,14 @@ export default function FeaturesIncoming() {
           alt="Mic disabled icon"
           title="Live audio"
           description=""
+          imageSize={100}
         />
         <GridItemFeatures
           image={ScreenShareDisabledIcon}
           alt="Screen share disabled icon"
           title="Screen share"
           description=""
+          imageSize={100}
         />
       </div>
     </div>

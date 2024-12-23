@@ -3,12 +3,26 @@ import Image from "next/image";
 import styles from "./header.module.css";
 import logo from "../../../public/Logo.svg";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768 && menuOpen) {
+        setMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [menuOpen]);
 
   return (
     <header className={styles.headerContainer}>
@@ -21,28 +35,20 @@ export default function Navbar() {
               alt="Logo de la aplicación"
               width={100}
               height={75}
-              priority
             />
           </Link>
         </div>
         <button
-          className={styles.menuButton}
-          aria-label="Toggle menu"
+          className={`${styles.menuButton} ${menuOpen ? styles.menuButtonOpen : ""}`}
+          aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
           aria-expanded={menuOpen}
           onClick={toggleMenu}
         >
-          ☰
+          <span className={styles.menuButtonIcon}></span>
         </button>
-        {menuOpen && (
-          <div
-            className={styles.backdrop}
-            aria-hidden="true"
-            onClick={() => setMenuOpen(false)}
-          />
-        )}
         <ul
           className={`${styles.headerNavbarOptionsContainer} ${
-            menuOpen ? styles.menuOpen : styles.menuClosed
+            menuOpen ? styles.menuOpen : ""
           }`}
           role="menu"
         >

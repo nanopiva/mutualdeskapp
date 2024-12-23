@@ -1,14 +1,11 @@
 .contactSection {
-  max-width: 80%;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
+  padding: 2rem 0;
   background-color: var(--white);
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-.contactSection h2 {
-  font-size: 1.8rem;
+.contactTitle {
+  font-size: 2rem;
   color: var(--strong-green);
   text-align: center;
   margin-bottom: 2rem;
@@ -17,7 +14,10 @@
 .contactForm {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .formGroup {
@@ -28,7 +28,7 @@
 .formGroup label {
   font-weight: bold;
   color: var(--black);
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
 }
 
 .formGroup input,
@@ -38,6 +38,7 @@
   border-radius: 4px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
+  background-color: var(--white);
 }
 
 .formGroup input:focus,
@@ -48,6 +49,7 @@
 
 .formGroup textarea {
   resize: vertical;
+  min-height: 120px;
 }
 
 .submitBtn {
@@ -60,9 +62,53 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.1s ease;
 }
 
 .submitBtn:hover {
   background-color: var(--light-green);
+}
+
+.submitBtn:active {
+  transform: translateY(1px);
+}
+
+.submitBtn:disabled {
+  background-color: var(--gray);
+  cursor: not-allowed;
+}
+
+.successMessage,
+.errorMessage {
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+.successMessage {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.errorMessage {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+@media (max-width: 768px) {
+  .contactSection {
+    padding: 1.5rem 0;
+  }
+
+  .contactTitle {
+    font-size: 1.75rem;
+  }
+
+  .formGroup input,
+  .formGroup textarea {
+    font-size: 16px;
+  }
 }

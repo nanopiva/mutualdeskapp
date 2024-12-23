@@ -5,9 +5,8 @@ import "@/app/globals.css";
 
 export default function Home() {
   return (
-    <div className={styles.mainContainer}>
-      <Header />
+    <main className={styles.mainContainer}>
       <MainFront />
-    </div>
+    </main>
   );
 }

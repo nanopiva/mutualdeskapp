@@ -6,17 +6,21 @@
   justify-content: center;
   background: var(--light-green);
   min-height: 27rem;
+  min-width: 280px;
 }
 .titleIntroContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-width: 330px;
 }
 
 .titleIntro {
   font-size: 4rem;
+  text-align: center;
 }
 .subtitleIntro {
   font-size: 1.2rem;
+  text-align: center;
 }

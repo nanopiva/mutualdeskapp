@@ -1,4 +1,35 @@
+.aboutContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  min-width: 280px;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 .strongWord {
   font-weight: bold;
   color: var(--strong-green);
+}
+
+.valuesList {
+  list-style-type: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.valuesList li {
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 0;
+  }
 }

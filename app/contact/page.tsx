@@ -5,10 +5,11 @@ import ContactForm from "../components/ContactForm/contactform";
 
 export default function Contact() {
   return (
-    <div className={styles.contactContainer}>
-      <Header />
-      <IntroFrontPages title="Contact" subtitle="How you can contact us" />
-      <ContactForm />
-    </div>
+    <>
+      <main className={styles.main}>
+        <IntroFrontPages title="Contact" subtitle="How you can reach us" />
+        <ContactForm />
+      </main>
+    </>
   );
 }

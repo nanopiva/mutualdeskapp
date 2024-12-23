@@ -1,15 +1,29 @@
-.featuresNowTitle {
-  font-size: 2rem;
-  text-align: center;
-  padding: 4rem 0;
+.featuresNowContainer {
+  width: 100%;
+  padding: 2rem 1rem; /* Ajusta el padding */
+  min-width: 280px;
 }
+
+.featuresNowTitle {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 2rem 0;
+}
+
 .featuresNowGridContainer {
-  --autofit-grid-item-size: 30rem;
+  width: 100%;
   display: grid;
   gap: 2rem;
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(var(--autofit-grid-item-size), 1fr)
-  );
-  margin: 0 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .featuresNowTitle {
+    font-size: 1.5rem;
+    padding: 1.5rem 0;
+  }
+
+  .featuresNowGridContainer {
+    grid-template-columns: 1fr;
+  }
 }
