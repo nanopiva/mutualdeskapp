@@ -118,13 +118,13 @@ export default function MyProjects() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Mis Proyectos</h1>
+        <h1 className={styles.title}>My projects</h1>
         <Link
           href="/dashboard/my-projects/new-project"
           className={styles.newProjectButton}
         >
           <Plus size={20} />
-          Nuevo Proyecto
+          New Project
         </Link>
       </div>
 
@@ -133,7 +133,7 @@ export default function MyProjects() {
       ) : (
         <>
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Proyectos de Grupo</h2>
+            <h2 className={styles.sectionTitle}>Group projects</h2>
             {groupProjects.length > 0 ? (
               <div className={styles.projectGrid}>
                 {groupProjects.map((project) => (
@@ -150,13 +150,13 @@ export default function MyProjects() {
               </div>
             ) : (
               <p className={styles.noProjects}>
-                No se encontraron proyectos de grupo
+                We could not found any group project
               </p>
             )}
           </div>
 
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Proyectos Individuales</h2>
+            <h2 className={styles.sectionTitle}>Individual projects</h2>
             {individualProjects.length > 0 ? (
               <div className={styles.projectGrid}>
                 {individualProjects.map((project) => (
@@ -173,7 +173,7 @@ export default function MyProjects() {
               </div>
             ) : (
               <p className={styles.noProjects}>
-                No se encontraron proyectos individuales
+                We could not found any individual project.
               </p>
             )}
           </div>

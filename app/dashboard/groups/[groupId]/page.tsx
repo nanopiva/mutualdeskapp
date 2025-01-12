@@ -5,8 +5,7 @@ import styles from "./page.module.css";
 type Params = { groupId: string };
 
 export default async function GroupPage({ params }: { params: Params }) {
-  const params1 = await params;
-  const groupId = await params1.groupId;
+  const { groupId } = await params;
   const supabase = await createClient();
 
   try {

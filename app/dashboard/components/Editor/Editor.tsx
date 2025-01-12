@@ -26,7 +26,6 @@ import { useState } from "react";
 import { parseAllowedColor, parseAllowedFontSize } from "./styleConfig";
 import LoadText from "./LoadText";
 import UsersInProject from "../UsersInProject/UsersInProject";
-
 const removeStylesExportDOM = (
   editor: LexicalEditor,
   target: LexicalNode
@@ -165,8 +164,8 @@ export default function Editor({ projectId, userId }: EditorProps) {
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <div className="editor-container">
-        <UsersInProject projectId={projectId} currentUserId={userId} />
         <LoadText projectId={projectId} userId={userId} />
+        <UsersInProject projectId={projectId} currentUserId={userId} />
         <MenuBar projectId={projectId} />
         <Toolbar projectId={projectId} onPageSizeChange={setSelectedPageSize} />
         <div className="editor-pages">

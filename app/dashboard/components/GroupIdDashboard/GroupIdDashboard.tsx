@@ -6,6 +6,7 @@ import styles from "./GroupIdDashboard.module.css";
 import ProfileCard from "../ProfileCard/MemberCard";
 import AddMemberPanel from "../AddMemberPanel/AddMemberPanel";
 import MemberInvitation from "../MemberInvitation/MemberInvitation";
+import ProjectCard from "../ProjectCard/ProjectCard";
 
 interface GroupData {
   id: string;
@@ -181,11 +182,15 @@ export default function GroupIdDashboard({
         {groupProjectsData.length > 0 ? (
           <div className={styles.projectGrid}>
             {groupProjectsData.map((project) => (
-              <div key={project.id} className={styles.projectCard}>
-                <h3>{project.name}</h3>
-                <p>{project.is_public ? "Public" : "Private"}</p>
-                <p>{extractTextFromContent(project.content)}</p>
-              </div>
+              <ProjectCard
+                key={project.id}
+                id={project.id}
+                name={project.name}
+                role=""
+                isPublic={project.is_public}
+                contentSnippet={extractTextFromContent(project.content)}
+                isGroup={true}
+              />
             ))}
           </div>
         ) : (

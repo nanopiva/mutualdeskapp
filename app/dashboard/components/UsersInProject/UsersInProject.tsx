@@ -3,10 +3,12 @@ import styles from "./UsersInProject.module.css";
 import { createClient } from "@/utils/supabase/client";
 import { getUserById } from "@/app/actions";
 import AvatarIcon from "../AvatarIcon/AvatarIcon";
+import { verifyUserRole } from "@/app/actions";
+import { verifyUserAuthor } from "@/app/actions";
 
 interface UsersInProjectProps {
   projectId: string;
-  currentUserId: string | null | undefined; // ID del usuario que visualiza el componente
+  currentUserId: string | null | undefined;
 }
 
 interface UserData {
@@ -24,6 +26,8 @@ export default function UsersInProject({
 }: UsersInProjectProps) {
   const [users, setUsers] = useState<UserData[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isUserAdmin, setIsUserAdmin] = useState<boolean>(false);
+  const [isUserAuthor, setIsUserAuthor] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState(false);
   const [menuOpen, setMenuOpen] = useState<Record<string, boolean>>({});
   const [modalData, setModalData] = useState<{
@@ -55,36 +59,66 @@ export default function UsersInProject({
         setError("No se pudieron cargar los usuarios del proyecto.");
       }
     };
+    const checkUserRole = async () => {
+      const userRole = await verifyUserRole(currentUserId, projectId);
+      setIsUserAdmin(userRole === "admin");
+    };
+    const checkUserAuthor = async () => {
+      const authorId = await verifyUserAuthor(currentUserId, projectId);
+      setIsUserAuthor(authorId === currentUserId);
+    };
 
     fetchUsers();
-  }, [projectId]);
+    checkUserRole();
+    checkUserAuthor();
+  }, [projectId, currentUserId]);
+
+  useEffect(() => {
+    setError(null);
+  }, [users]);
 
   const toggleMenu = (userId: string) => {
     setMenuOpen((prev) => ({ ...prev, [userId]: !prev[userId] }));
   };
 
   const removeUser = async (userId: string) => {
-    const supabase = createClient();
+    const supabase = await createClient();
     try {
-      await supabase
+      console.log("Deleting user:", userId, "from project:", projectId);
+
+      const { data, error } = await supabase
         .from("project_members")
         .delete()
         .eq("user_id", userId)
         .eq("project_id", projectId);
+
+      if (error) {
+        throw error;
+      }
+
+      console.log("User successfully removed.");
       setUsers((prev) => prev.filter((user) => user.id !== userId));
     } catch (error) {
       console.error("Error removing user:", error);
+      setError("No se pudo eliminar al usuario del proyecto.");
     }
   };
 
   const updateUserRole = async (userId: string, newRole: string) => {
-    const supabase = createClient();
+    const supabase = await createClient();
     try {
-      await supabase
+      const { data, error } = await supabase
         .from("project_members")
         .update({ role: newRole })
         .eq("user_id", userId)
         .eq("project_id", projectId);
+
+      if (error) {
+        console.error(error);
+        throw error;
+      }
+
+      console.log("User role successfully updated.");
       setUsers((prev) =>
         prev.map((user) =>
           user.id === userId ? { ...user, role: newRole } : user
@@ -93,6 +127,28 @@ export default function UsersInProject({
       setModalData(null);
     } catch (error) {
       console.error("Error updating user role:", error);
+      setError("No se pudo actualizar el rol del usuario.");
+    }
+  };
+
+  const deleteProject = async () => {
+    if (!isUserAuthor) return;
+
+    const supabase = createClient();
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .delete()
+        .eq("id", projectId);
+
+      if (error) throw error;
+
+      // Redirect or update UI after successful deletion
+      // For example, you could redirect to a projects list page:
+      // router.push('/projects');
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      setError("No se pudo eliminar el proyecto.");
     }
   };
 
@@ -115,7 +171,7 @@ export default function UsersInProject({
         onClick={() => setIsVisible((prev) => !prev)}
         aria-expanded={isVisible}
       >
-        {isVisible ? "▲ Ocultar usuarios" : "▼ Mostrar usuarios"}
+        {isVisible ? "▲ Hide users" : "▼ Show users"}
       </button>
       {isVisible && (
         <div className={styles.usersContainer}>
@@ -134,7 +190,7 @@ export default function UsersInProject({
                 <p className={styles.userEmail}>{user.email}</p>
                 <p className={styles.userRole}>Rol: {user.role}</p>
               </div>
-              {currentUserId === user.id && user.role === "admin" && (
+              {isUserAdmin && (
                 <div className={styles.optionsMenu}>
                   <button
                     className={styles.menuButton}
@@ -164,7 +220,7 @@ export default function UsersInProject({
       {modalData && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
-            <h2>Cambiar rol del usuario</h2>
+            <h2>Change user role</h2>
             <select
               value={modalData.role}
               onChange={(e) =>
@@ -179,13 +235,18 @@ export default function UsersInProject({
               className={styles.saveButton}
               onClick={() => updateUserRole(modalData.userId, modalData.role)}
             >
-              Guardar
+              Save
             </button>
             <button className={styles.cancelButton} onClick={closeModal}>
-              Cancelar
+              Cancel
             </button>
           </div>
         </div>
+      )}
+      {isUserAuthor && (
+        <button className={styles.deleteProjectButton} onClick={deleteProject}>
+          Delete Project
+        </button>
       )}
     </div>
   );

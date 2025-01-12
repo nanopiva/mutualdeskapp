@@ -835,3 +835,21 @@ export async function verifyUserRole(
     return userRole.role;
   }
 }
+
+export async function verifyUserAuthor(
+  userId: string | null | undefined,
+  projectId: string
+) {
+  const supabase = await createClient();
+  const { data: userRole, error: userError } = await supabase
+    .from("projects")
+    .select("author_id")
+    .eq("project_id", projectId)
+    .eq("author_id", userId)
+    .single();
+  if (userError || userId == null || userId == undefined) {
+    return null;
+  } else {
+    return userRole.author_id;
+  }
+}
