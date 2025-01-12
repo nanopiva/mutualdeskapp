@@ -20,19 +20,30 @@ import {
   UNDO_COMMAND,
 } from "lexical";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useDebouncedCallback } from "use-debounce";
-import { saveProjectInDatabase } from "@/app/actions";
+import styles from "./Toolbar.module.css";
+
 const LowPriority = 1;
 
 function Divider() {
   return <div className="divider" />;
 }
 
+type PageSizeKey = "A4" | "A3" | "Letter" | "Legal";
 interface ToolbarProps {
   projectId: string;
+  onPageSizeChange: (size: PageSizeKey) => void;
 }
+const pageSizes: Record<PageSizeKey, { width: string; height: string }> = {
+  A4: { width: "210mm", height: "297mm" },
+  A3: { width: "297mm", height: "420mm" },
+  Letter: { width: "8.5in", height: "11in" },
+  Legal: { width: "8.5in", height: "14in" },
+};
 
-export default function ToolbarPlugin({ projectId }: ToolbarProps) {
+export default function ToolbarPlugin({
+  projectId,
+  onPageSizeChange,
+}: ToolbarProps) {
   const [editor] = useLexicalComposerContext();
   const toolbarRef = useRef(null);
   const [canUndo, setCanUndo] = useState(false);
@@ -62,7 +73,7 @@ export default function ToolbarPlugin({ projectId }: ToolbarProps) {
       }),
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
-        (_payload, _newEditor) => {
+        () => {
           $updateToolbar();
           return false;
         },
@@ -87,8 +98,15 @@ export default function ToolbarPlugin({ projectId }: ToolbarProps) {
     );
   }, [editor, $updateToolbar]);
 
+  const handlePageSizeChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const newSize = event.target.value as PageSizeKey; // Cast necesario
+    onPageSizeChange(newSize);
+  };
+
   return (
-    <div className="toolbar" ref={toolbarRef}>
+    <div className={`${styles.toolbar} toolbar`} ref={toolbarRef}>
       <button
         disabled={!canUndo}
         onClick={() => {
@@ -183,6 +201,23 @@ export default function ToolbarPlugin({ projectId }: ToolbarProps) {
       >
         <i className="format justify-align" />
       </button>{" "}
+      <div className={`${styles.toolbar} toolbar`}>
+        {/* Otros botones de la toolbar */}
+        <div className="toolbar-item">
+          <select
+            id="page-size"
+            onChange={handlePageSizeChange}
+            className={`page-size-selector ${styles.pageSizeSelect}`}
+            defaultValue="A4"
+          >
+            {Object.keys(pageSizes).map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
     </div>
   );
 }

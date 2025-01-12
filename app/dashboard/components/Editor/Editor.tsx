@@ -1,10 +1,3 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
 "use client";
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
@@ -27,11 +20,12 @@ import {
 import ExampleTheme from "./ExampleTheme";
 import Toolbar from "./Toolbar";
 import "./editorStyles.css";
+import MenuBar from "./MenuBar";
+import { useState } from "react";
 
 import { parseAllowedColor, parseAllowedFontSize } from "./styleConfig";
 import LoadText from "./LoadText";
-
-const placeholder = "Enter some rich text...";
+import UsersInProject from "../UsersInProject/UsersInProject";
 
 const removeStylesExportDOM = (
   editor: LexicalEditor,
@@ -148,27 +142,42 @@ interface EditorProps {
   userId: string | null | undefined;
 }
 
-export default function Editor({ projectId,userId }: EditorProps) {
+export default function Editor({ projectId, userId }: EditorProps) {
+  type PageSizeKey = "A4" | "A3" | "Letter" | "Legal";
+
+  const pageSizes: Record<PageSizeKey, { width: string; height: string }> = {
+    A4: { width: "210mm", height: "297mm" },
+    A3: { width: "297mm", height: "420mm" },
+    Letter: { width: "8.5in", height: "11in" },
+    Legal: { width: "8.5in", height: "14in" },
+  };
+  const [selectedPageSize, setSelectedPageSize] = useState<PageSizeKey>("A4");
+
+  const pageStyle = {
+    ...pageSizes[selectedPageSize],
+    margin: "10mm auto", // Margen entre páginas
+    background: "#fff",
+    boxShadow: "0 0 5px rgba(0,0,0,0.1)",
+    padding: "20mm", // Margen interno
+    overflow: "hidden",
+  };
+
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <div className="editor-container">
+        <UsersInProject projectId={projectId} currentUserId={userId} />
         <LoadText projectId={projectId} userId={userId} />
-        <Toolbar projectId={projectId} />
-        <div className="editor-inner">
-          <RichTextPlugin
-            contentEditable={
-              <ContentEditable
-                className="editor-input"
-                aria-placeholder={placeholder}
-                placeholder={
-                  <div className="editor-placeholder">{placeholder}</div>
-                }
-              />
-            }
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-          <HistoryPlugin />
-          <AutoFocusPlugin />
+        <MenuBar projectId={projectId} />
+        <Toolbar projectId={projectId} onPageSizeChange={setSelectedPageSize} />
+        <div className="editor-pages">
+          <div className="editor-page" style={pageStyle}>
+            <RichTextPlugin
+              contentEditable={<ContentEditable className="editor-input" />}
+              ErrorBoundary={LexicalErrorBoundary}
+            />
+            <HistoryPlugin />
+            <AutoFocusPlugin />
+          </div>
         </div>
       </div>
     </LexicalComposer>

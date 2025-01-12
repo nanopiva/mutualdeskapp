@@ -1,0 +1,75 @@
+.groupsContainer {
+  background: var(--background);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  color: var(--black);
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.groupList {
+  list-style-type: none;
+  padding: 0;
+}
+
+.groupItem {
+  background-color: var(--white);
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  margin-bottom: 15px;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.groupInfo {
+  flex-grow: 1;
+}
+
+.groupName {
+  color: var(--strong-green);
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.groupDescription {
+  color: var(--gray);
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.groupDate {
+  color: var(--gray);
+  font-size: 12px;
+}
+
+.groupLink {
+  background-color: var(--light-green);
+  color: var(--white);
+  padding: 8px 15px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.groupLink:hover {
+  background-color: var(--strong-green);
+}
+
+.loading,
+.error,
+.noGroups {
+  color: var(--gray);
+  text-align: center;
+  padding: 20px;
+}
+
+.error {
+  color: #ff0000;
+}

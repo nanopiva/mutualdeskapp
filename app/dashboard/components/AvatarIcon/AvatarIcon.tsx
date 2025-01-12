@@ -27,7 +27,7 @@ const AvatarIcon: React.FC<AvatarIconProps> = ({
     <Avatar.Fallback
       className={styles.Fallback}
       delayMs={600}
-      style={{ fontSize: `${size / 12}px` }}
+      style={{ fontSize: `${size / 3}px` }}
     >
       {firstLetterBackup}
       {secondLetterBackup}

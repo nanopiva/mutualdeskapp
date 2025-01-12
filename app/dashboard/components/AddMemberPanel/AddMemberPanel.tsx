@@ -2,7 +2,7 @@
 
 import styles from "./AddMemberPanel.module.css";
 import { useState } from "react";
-import { sendGroupInvitation } from "@/app/actions";
+import { sendGroupInvitationForm } from "@/app/actions";
 import { createClient } from "@/utils/supabase/client";
 
 export default function AddMemberPanel(props: { groupId: string }) {
@@ -10,7 +10,6 @@ export default function AddMemberPanel(props: { groupId: string }) {
   const [role, setRole] = useState("viewer");
 
   const handleSubmit = async (formData: FormData) => {
-    // Agregar el groupId y el senederId al FormData antes de enviarlo
     const supabase = await createClient();
     const { data: senderUser, error: senderError } =
       await supabase.auth.getUser();
@@ -21,48 +20,47 @@ export default function AddMemberPanel(props: { groupId: string }) {
 
     formData.append("senderId", senderId);
     formData.append("groupId", props.groupId);
-    await sendGroupInvitation(formData); // Llamada a la acción
+    await sendGroupInvitationForm(formData);
   };
 
   return (
     <div className={styles.addMemberFormContainer}>
+      <h2 className={styles.formTitle}>Invite a New Member</h2>
       <form className={styles.addMemberForm} action={handleSubmit}>
-        <label htmlFor="email" className={styles.addMemberLabel}>
-          Email
-        </label>
-        <input
-          type="email"
-          className={styles.addMemberEmailInput}
-          id="email"
-          name="email"
-          onChange={(e) => setEmail(e.target.value)}
-        ></input>
+        <div className={styles.formGroup}>
+          <label htmlFor="email" className={styles.addMemberLabel}>
+            Email
+          </label>
+          <input
+            type="email"
+            className={styles.addMemberInput}
+            id="email"
+            name="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
 
-        <label
-          htmlFor="role"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Role
-        </label>
-        <select
-          id="role"
-          name="role"
-          onChange={(e) => setRole(e.target.value)}
-          className={styles.addMemberSelect}
-        >
-          <option className={styles.addMemberOption} value="viewer">
-            Viewer
-          </option>
-          <option className={styles.addMemberOption} value="editor">
-            Editor
-          </option>
-          <option className={styles.addMemberOption} value="author">
-            Author
-          </option>
-        </select>
+        <div className={styles.formGroup}>
+          <label htmlFor="role" className={styles.addMemberLabel}>
+            Role
+          </label>
+          <select
+            id="role"
+            name="role"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className={styles.addMemberSelect}
+          >
+            <option value="viewer">Viewer</option>
+            <option value="editor">Editor</option>
+            <option value="author">Author</option>
+          </select>
+        </div>
 
         <button className={styles.addMemberButton} type="submit">
-          Send invitation
+          Send Invitation
         </button>
       </form>
     </div>

@@ -5,23 +5,48 @@ import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { UUID } from "crypto";
+
 import { SerializedEditorState } from "lexical";
+import { isNull } from "util";
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
-  const firstName = formData.get("first_name")?.toString();
-  const lastName = formData.get("last_name")?.toString();
+  const firstName = formData.get("firstName")?.toString();
+  const lastName = formData.get("lastName")?.toString();
 
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
+  // Validaciones
   if (!email || !password || !firstName || !lastName) {
-    return { error: "All fields are required to login" };
+    return { error: "All fields are required." };
   }
 
-  // Guarda el usuario en auth.users
+  // Validar formato del email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { error: "Invalid email format." };
+  }
+
+  // Validar contraseña
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+  if (!passwordRegex.test(password)) {
+    return {
+      error:
+        "Password must have at least 8 characters, one uppercase, one lowercase, one number, and one special character.",
+    };
+  }
+
+  // Validar longitud de nombres
+  if (firstName.length < 2 || lastName.length < 2) {
+    return {
+      error: "First and last names must be at least 2 characters long.",
+    };
+  }
+
+  // Intentar registrar al usuario
   const { error, data: user } = await supabase.auth.signUp({
     email,
     password,
@@ -30,7 +55,12 @@ export const signUpAction = async (formData: FormData) => {
     },
   });
 
-  // Guarda el usuario tambien, pero en la tabla de public.users
+  if (error) {
+    console.error(error.code + " " + error.message);
+    return encodedRedirect("error", "/sign-up", error.message);
+  }
+
+  // Guardar usuario en la base de datos
   const { error: errorSavingUser } = await supabase.from("users").insert({
     id: user.user?.id,
     email,
@@ -40,21 +70,14 @@ export const signUpAction = async (formData: FormData) => {
 
   if (errorSavingUser) {
     console.error(errorSavingUser);
-    // localhost:3000/sign-up?error=errorSavingUser.message
     return encodedRedirect("error", "/sign-up", errorSavingUser.message);
   }
 
-  if (error) {
-    console.error(error.code + " " + error.message);
-    // localhost:3000/sign-up?error=error.message
-    return encodedRedirect("error", "/sign-up", error.message);
-  } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link."
-    );
-  }
+  return encodedRedirect(
+    "success",
+    "/sign-up?success=true",
+    "Thanks for signing up! Please check your email for a verification link."
+  );
 };
 
 export const signInAction = async (formData: FormData) => {
@@ -77,23 +100,48 @@ export const signInAction = async (formData: FormData) => {
 export const forgotPasswordAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const supabase = await createClient();
-  const origin = (await headers()).get("origin");
   const callbackUrl = formData.get("callbackUrl")?.toString();
 
+  // Validación del email en el servidor
   if (!email) {
     return encodedRedirect("error", "/forgot-password", "Email is required");
   }
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?redirect_to=/dashboard/reset-password`,
-  });
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return encodedRedirect("error", "/forgot-password", "Invalid email format");
+  }
 
-  if (error) {
-    console.error(error.message);
+  // Verificar si el email existe en la base de datos
+  const { data: user, error: fetchError } = await supabase
+    .from("users")
+    .select("email")
+    .eq("email", email)
+    .single();
+
+  // Si no se encuentra el usuario, actuar como si la operación fue exitosa
+  if (fetchError || !user) {
+    return encodedRedirect(
+      "success",
+      "/forgot-password",
+      "If an account with that email exists, you will receive a recovery link shortly."
+    );
+  }
+
+  // Enviar el correo si el email es válido
+  const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+    email,
+    {
+      redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password`,
+    }
+  );
+
+  if (resetError) {
+    console.error(resetError.message);
     return encodedRedirect(
       "error",
       "/forgot-password",
-      "Could not reset password"
+      "Could not reset password. Please try again later."
     );
   }
 
@@ -104,7 +152,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
   return encodedRedirect(
     "success",
     "/forgot-password",
-    "Check your email for a link to reset your password."
+    "If an account with that email exists, you will receive a recovery link shortly."
   );
 };
 
@@ -115,34 +163,20 @@ export const resetPasswordAction = async (formData: FormData) => {
   const confirmPassword = formData.get("confirmPassword") as string;
 
   if (!password || !confirmPassword) {
-    encodedRedirect(
-      "error",
-      "/dashboard/reset-password",
-      "Password and confirm password are required"
-    );
+    return { error: "Password and confirm password are required" };
   }
 
   if (password !== confirmPassword) {
-    encodedRedirect(
-      "error",
-      "/dashboard/reset-password",
-      "Passwords do not match"
-    );
+    return { error: "Passwords do not match" };
   }
 
-  const { error } = await supabase.auth.updateUser({
-    password: password,
-  });
+  const { error } = await supabase.auth.updateUser({ password });
 
   if (error) {
-    encodedRedirect(
-      "error",
-      "/dashboard/reset-password",
-      "Password update failed"
-    );
+    return { error: "Password update failed" };
   }
 
-  encodedRedirect("success", "/dashboard/reset-password", "Password updated");
+  return { success: true };
 };
 
 export const signOutAction = async () => {
@@ -247,62 +281,6 @@ export async function getUserGroups() {
   return groups;
 }
 
-export const createGroup = async (formData: FormData) => {
-  const groupName = formData.get("groupName")?.toString();
-  const groupDescription = formData.get("groupDescription")?.toString();
-
-  if (!groupName) {
-    throw new Error("El nombre del grupo es requerido");
-  }
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("Usuario no autenticado");
-  }
-  const creator_id = user.id;
-
-  //Se crea el grupo
-
-  const { data: group, error: groupError } = await supabase
-    .from("groups")
-    .insert({
-      name: groupName,
-      description: groupDescription || "",
-      creator_id: creator_id,
-    })
-    .select()
-    .single();
-
-  if (groupError) {
-    throw new Error(`Error al crear el grupo: ${groupError.message}`);
-  }
-
-  // Añadir al creador como miembro admin
-  const { error: memberError } = await supabase.from("group_members").insert({
-    group_id: group.id,
-    user_id: creator_id,
-    role: "admin",
-  });
-
-  if (memberError) {
-    // Si falla la adición del miembro, eliminamos el grupo creado
-    await supabase.from("groups").delete().eq("id", group.id);
-    throw new Error(
-      `Error al añadir al creador como miembro: ${memberError.message}`
-    );
-  }
-
-  // Revalidar la ruta para actualizar la lista de grupos
-  revalidatePath("/dashboard/groups");
-
-  // Redirigir a la página del grupo recién creado
-  redirect(`dashboard/groups/${group.id}`);
-};
-
 export const addGroupIntegrant = async (formData: FormData) => {
   const integrantEmail = formData.get("email")?.toString();
   const integrantRole = formData.get("role")?.toString();
@@ -358,7 +336,7 @@ export const addGroupIntegrant = async (formData: FormData) => {
   }
 };
 
-export const sendGroupInvitation = async (formData: FormData) => {
+export const sendGroupInvitationForm = async (formData: FormData) => {
   const integrantEmail = formData.get("email")?.toString();
   const integrantRole = formData.get("role")?.toString();
   const group_id = formData.get("groupId")?.toString();
@@ -432,19 +410,20 @@ export const sendGroupInvitation = async (formData: FormData) => {
   }
 };
 
-export const createProject = async (formData: FormData) => {
-  const projectName = formData.get("projectName")?.toString();
-  const projectDescription = formData.get("projectDescription")?.toString();
-  const isPublic = formData.get("isPublic") === "on";
-  const group = formData.get("group")?.toString();
-  let groupId;
-  if (group === "none") {
-    groupId = null;
-  } else {
-    groupId = group;
+export const createProject = async (
+  projectName: string,
+  projectDescription: string | null,
+  isPublic: boolean,
+  groupSelected: string | null
+) => {
+  console.log(projectName, projectDescription, isPublic, groupSelected);
+  if (!projectName || isPublic === undefined || isPublic === null) {
+    throw new Error("Nombre del proyecto y tipo son requeridos");
   }
 
-  console.log(projectName, projectDescription, isPublic, group);
+  if (groupSelected === "") {
+    groupSelected = null;
+  }
 
   const supabase = await createClient();
   const {
@@ -453,8 +432,7 @@ export const createProject = async (formData: FormData) => {
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    console.error("No se encontro el usuario");
-    return;
+    throw new Error("No se encontró el usuario");
   }
 
   const { data: projectData, error: projectError } = await supabase
@@ -464,20 +442,18 @@ export const createProject = async (formData: FormData) => {
       description: projectDescription,
       is_public: isPublic,
       author_id: user.id,
-      group_id: groupId,
+      group_id: groupSelected,
     })
     .select("id");
-  // seleccionamos el id del proyecto creado
+
   if (projectError) {
-    console.error("Error al insertar el proyecto");
-    return;
+    console.log(projectError);
+    throw new Error("Error al insertar el proyecto");
   }
 
   const projectId = projectData?.[0]?.id;
-  console.log(projectId);
-  if (projectId === null) {
-    console.error("Error generando Id de proyecto");
-    return;
+  if (!projectId) {
+    throw new Error("Error generando Id de proyecto");
   }
 
   const { error: projectMembersError } = await supabase
@@ -485,63 +461,49 @@ export const createProject = async (formData: FormData) => {
     .insert({
       project_id: projectId,
       user_id: user.id,
-      group_id: groupId,
+      group_id: groupSelected,
       role: "admin",
     });
 
   if (projectMembersError) {
-    console.error(
-      "Error insertando el miembro al proyecto",
-      projectMembersError
-    );
-    return;
+    throw new Error("Error insertando el miembro al proyecto");
   }
 
-  //En caso de que sea un proyecto en grupo, buscaremos a los integrantes y el rol que tengan en el grupo y los añadimos al proyecto con ese rol.
-  if (groupId != null) {
+  if (groupSelected) {
     const { data: otherMembers, error: otherMembersError } = await supabase
       .from("group_members")
       .select("user_id,role")
-      .eq("group_id", groupId)
-      .neq("role", "admin");
+      .eq("group_id", groupSelected)
+      .neq("user_id", user.id);
 
     if (otherMembersError) {
-      console.error("Error obteniendo al resto de los miembros");
-      return;
+      throw new Error("Error obteniendo al resto de los miembros");
     }
-    try {
-      const insertPromises = otherMembers.map(async (member) => {
-        const { error: insertError } = await supabase
-          .from("project_members")
-          .insert({
-            project_id: projectId, // ID del proyecto
-            user_id: member.user_id, // ID del usuario
-            role: member.role,
-          });
 
-        if (insertError) {
-          console.error(
-            `Error al agregar usuario ${user.id} al proyecto:`,
-            insertError
-          );
-        }
-      });
+    const insertPromises = otherMembers.map(async (member) => {
+      console.log(member.user_id, projectId, groupSelected, member.role);
+      const { error: insertError } = await supabase
+        .from("project_members")
+        .insert({
+          user_id: member.user_id,
+          project_id: projectId,
+          group_id: groupSelected,
+          role: member.role,
+        });
 
-      await Promise.all(insertPromises);
+      if (insertError) {
+        console.error(insertError);
+        throw new Error(
+          `Error al agregar al resto de los usuarios al proyecto`
+        );
+      }
+    });
 
-      console.log(
-        "Todos los usuarios fueron agregados al proyecto correctamente."
-      );
-    } catch (error) {
-      console.error(
-        "Error al agregar usuarios a la tabla project_members:",
-        error
-      );
-      throw new Error("Error al agregar usuarios al proyecto.");
-    }
+    await Promise.all(insertPromises);
   }
-};
 
+  return { success: true, projectId };
+};
 export const getUserById = async (userId: string) => {
   const supabase = await createClient();
 
@@ -620,3 +582,256 @@ export const getActualUserId = async () => {
   const userId = user?.id;
   return userId;
 };
+
+export const acceptInvitation = async (
+  groupId: string | null,
+  projectId: string | null,
+  role: string | null,
+  invitationId: string,
+  invitationSenderId: string
+) => {
+  const supabase = await createClient();
+  const userId = await getActualUserId();
+  if (groupId != null && projectId == null && role != null) {
+    try {
+      await supabase.from("group_members").insert({
+        group_id: groupId,
+        role: role,
+        user_id: userId,
+      });
+    } catch {
+      console.error("Error inserting group member");
+    }
+
+    try {
+      await supabase.from("invitations").delete().eq("id", invitationId);
+    } catch {
+      console.error("Error deleting group invitation");
+    }
+  }
+  if (groupId == null && projectId != null && role != null) {
+    try {
+      await supabase.from("project_members").insert({
+        project_id: projectId,
+        user_id: userId,
+        role: role,
+      });
+    } catch {
+      console.error("Error inserting project member");
+    }
+
+    try {
+      await supabase.from("invitations").delete().eq("id", invitationId);
+    } catch {
+      console.error("Error deleting project invitation");
+    }
+  }
+  if (groupId == null && projectId == null && role == null) {
+    try {
+      await supabase.from("friends_links").insert({
+        first_user_id: invitationSenderId,
+        second_user_id: userId,
+      });
+    } catch {
+      console.error("Error inserting friend");
+    }
+
+    try {
+      await supabase.from("invitations").delete().eq("id", invitationId);
+    } catch {
+      console.error("Error deleting friend request");
+    }
+  }
+};
+
+export const declineInvitation = async (invitationId: string) => {
+  const supabase = await createClient();
+
+  try {
+    await supabase.from("invitations").delete().eq("id", invitationId);
+  } catch {
+    console.error("Error deleting invitation");
+  }
+};
+
+export const fetchUserIdByEmail = async (email: string) => {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase.rpc("get_user_id_by_email", {
+      input_email: email,
+    });
+
+    if (error) {
+      console.error("Error fetching user ID:", error);
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    return null;
+  }
+};
+
+export const getGroupName = async (groupId: string | null) => {
+  if (!groupId) {
+    return "Group name not found.";
+  }
+  const supabase = await createClient();
+  const { data: groupData, error } = await supabase
+    .from("groups")
+    .select("name")
+    .eq("id", groupId)
+    .single();
+
+  if (error) {
+    return "Group name not found";
+  } else {
+    return groupData.name;
+  }
+};
+
+export const createGroup = async (formData: FormData) => {
+  const groupName = formData.get("groupName")?.toString();
+  const groupDescription = formData.get("description")?.toString();
+  const groupType = formData.get("groupType")?.toString();
+  const selectedFriends = JSON.parse(
+    formData.get("selectedFriends")?.toString() || "[]"
+  );
+  const inviteEmails = JSON.parse(
+    formData.get("inviteEmails")?.toString() || "[]"
+  );
+
+  if (!groupName) {
+    throw new Error("El nombre del grupo es requerido");
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Usuario no autenticado");
+  }
+  const creator_id = user.id;
+
+  // Create the group
+  const { data: group, error: groupError } = await supabase
+    .from("groups")
+    .insert({
+      name: groupName,
+      description: groupDescription || "",
+      creator_id: creator_id,
+      is_public: groupType === "public",
+    })
+    .select()
+    .single();
+
+  if (groupError) {
+    throw new Error(`Error al crear el grupo: ${groupError.message}`);
+  }
+
+  // Creator is automatically added as group_member (trigger in supabase)
+
+  // Invite selected friends
+  for (const friendId of selectedFriends) {
+    await sendGroupInvitation({
+      email: friendId,
+      role: "member",
+      groupId: group.id,
+      senderId: creator_id,
+    });
+  }
+
+  // Invite by email
+  for (const email of inviteEmails) {
+    await sendGroupInvitation({
+      email: email,
+      role: "member",
+      groupId: group.id,
+      senderId: creator_id,
+    });
+  }
+
+  // Revalidate the route to update the groups list
+  revalidatePath("/dashboard/groups");
+
+  // Redirect to the newly created group page
+  redirect(`dashboard/groups/${group.id}`);
+};
+
+// Update the sendGroupInvitation function to handle both friend IDs and emails
+export const sendGroupInvitation = async ({
+  email,
+  role,
+  groupId,
+  senderId,
+}: {
+  email: string;
+  role: string;
+  groupId: string;
+  senderId: string;
+}) => {
+  const supabase = await createClient();
+
+  try {
+    // Check if the email is actually a user ID (for friends)
+    let receiver_id = email;
+    if (!email.includes("@")) {
+      receiver_id = email; // It's already a user ID
+    } else {
+      // It's an email, so we need to find the user ID
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("email", email)
+        .single();
+
+      if (userError || !userData) {
+        throw new Error("Usuario no encontrado");
+      }
+      receiver_id = userData.id;
+    }
+
+    const { error: insertError } = await supabase.from("invitations").insert({
+      sender_id: senderId,
+      receiver_id: receiver_id,
+      group_id: groupId,
+      status: "pending",
+      role: role,
+    });
+
+    if (insertError) {
+      throw new Error("Error al enviar la invitación");
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error en sendGroupInvitation:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Error desconocido",
+    };
+  }
+};
+
+export async function verifyUserRole(
+  userId: string | null | undefined,
+  projectId: string
+) {
+  const supabase = await createClient();
+  const { data: userRole, error: userError } = await supabase
+    .from("project_members")
+    .select("role")
+    .eq("project_id", projectId)
+    .eq("user_id", userId)
+    .single();
+  if (userError || userId == null || userId == undefined) {
+    console.error("No se pudo verificar el rol del usuario");
+    return null;
+  } else {
+    return userRole.role;
+  }
+}

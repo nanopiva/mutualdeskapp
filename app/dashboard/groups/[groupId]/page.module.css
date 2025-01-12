@@ -1,64 +1,91 @@
-.groupDetailsContainer {
-  padding: 20px;
-  background-color: #ffffff;
-  font-family: "Arial", sans-serif;
-  color: #1f1f1f;
-  line-height: 1.6;
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: clamp(20px, 5vw, 40px);
+  background: var(--background-light);
+  border-radius: 8px;
 }
 
-.groupDetail {
-  margin-bottom: 20px;
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  border-bottom: 2px solid var(--input-border);
+  padding-bottom: 16px;
 }
 
-.groupName {
-  font-size: 2rem;
+@media (min-width: 600px) {
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.title {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  color: var(--primary-color);
   font-weight: bold;
-  color: #004d40; /* Dark green */
-  margin-bottom: 10px;
 }
 
-.groupDescription {
-  font-size: 1.2rem;
-  color: #333333;
-  margin-bottom: 10px;
+.newGroupButton {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: var(--accent-color);
+  color: var(--white);
+  text-decoration: none;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.groupMeta {
-  font-size: 0.95rem;
-  color: #555555;
+.newGroupButton:hover {
+  background-color: var(--accent-color-hover);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.newGroupButton svg {
+  margin-right: 8px;
+}
+
+.section {
+  margin-bottom: clamp(20px, 5vw, 40px);
+  padding: 20px;
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .sectionTitle {
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: #00695c; /* Medium green */
-  margin-top: 30px;
-  margin-bottom: 15px;
-  border-bottom: 2px solid #e0f2f1; /* Light green underline */
-  padding-bottom: 5px;
+  font-size: clamp(1.5rem, 3vw, 1.8rem);
+  color: var(--secondary-color);
+  margin-bottom: 16px;
+  font-weight: bold;
 }
 
-.noData {
-  font-size: 1rem;
-  color: #999999;
+.groupGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  padding: 16px;
+}
+
+.noGroups {
+  color: var(--gray);
   font-style: italic;
+  font-size: clamp(1rem, 2.5vw, 1.1rem);
+  text-align: center;
 }
 
-.groupMembersData {
-  margin-bottom: 10px;
-}
-
-.groupMembersData p {
-  font-size: 1rem;
-  margin: 5px 0;
-  color: #2e7d32; /* Subtle green */
-}
-
-.groupProjectsData {
-  margin-bottom: 10px;
-}
-
-.groupProjectsData p {
-  font-size: 1rem;
-  margin: 5px 0;
+.error {
+  color: #ff4d4f;
+  font-weight: bold;
+  margin-top: 16px;
 }

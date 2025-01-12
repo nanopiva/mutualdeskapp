@@ -44,12 +44,7 @@ export const updateSession = async (request: NextRequest) => {
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
 
-    const loginRoutes = [
-      "/forgot-password",
-      "/sign-in",
-      "/sign-up",
-      "/dashboard/reset-password",
-    ];
+    const loginRoutes = ["/sign-in"];
 
     if (loginRoutes.includes(request.nextUrl.pathname) && !user.error) {
       return NextResponse.redirect(new URL("/dashboard", request.url));

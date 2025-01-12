@@ -13,7 +13,7 @@ import downArrow from "./down-arrow-multimedia-option-svgrepo-com.svg";
 import { createClient } from "@/utils/supabase/client";
 import { getUserGroups } from "@/app/actions";
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen }: { isOpen: boolean }) {
   const [isGroupsOpen, setIsGroupsOpen] = useState(false); // Estado del acordeón de grupos
   const [groups, setGroups] = useState<{ id: string; name: string }[]>([]);
 
@@ -43,7 +43,7 @@ export default function Sidebar() {
   };
 
   return (
-    <nav className={styles.sidebarContainer}>
+    <nav className={`${styles.sidebarContainer} ${isOpen ? styles.open : ""}`}>
       {/* Navegación Principal */}
       <Link
         href="/dashboard/my-projects"
@@ -55,7 +55,10 @@ export default function Sidebar() {
 
       {/* Grupos */}
       <div className={styles.groupButton}>
-        <Link href="/groups" className={styles.itemSidebarContainer}>
+        <Link
+          href="/dashboard/groups"
+          className={`${styles.itemSidebarContainer} ${styles.groupSidebarItem}`}
+        >
           <Image src={groupsLogo} alt="Logo of Groups" width={35} height={35} />
           <span className={styles.itemSidebarTitle}>Groups</span>
         </Link>

@@ -1,6 +1,7 @@
 import styles from "./mainfront.module.css";
 import Image from "next/image";
 import mainImage from "../../../public/frontImage.jpg";
+import Link from "next/link";
 
 export default function Mainfront() {
   return (
@@ -19,16 +20,18 @@ export default function Mainfront() {
           live editor, chat and many other funcionalities coming soon!
         </p>
         <div className={styles.loginContainerDescription}>
-          <a
+          <Link
             className={`${styles.loginButtonDescription} ${styles.buttonDescription}`}
+            href="/sign-in"
           >
             Login
-          </a>
-          <a
+          </Link>
+          <Link
             className={`${styles.signupButtonDescription} ${styles.buttonDescription}`}
+            href="/sign-up"
           >
             Sign Up
-          </a>
+          </Link>
         </div>
       </div>
       <div className={styles.mainfrontImageContainer}>

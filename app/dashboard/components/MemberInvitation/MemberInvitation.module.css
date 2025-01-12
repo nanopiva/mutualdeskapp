@@ -1,0 +1,42 @@
+.invitationCard {
+  background-color: #f8f9fa;
+  border: 1px solid var(--light-green);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 1rem;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+  max-width: 400px;
+}
+
+.invitationCard:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.invitationHeader {
+  margin-bottom: 12px;
+}
+
+.invitationTitle {
+  font-size: 1.2rem;
+  color: #343a40;
+  margin: 0;
+}
+
+.invitationBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.invitationDetail {
+  font-size: 0.9rem;
+  color: #495057;
+  margin: 0;
+}
+
+.label {
+  font-weight: bold;
+  color: #212529;
+  margin-right: 8px;
+}

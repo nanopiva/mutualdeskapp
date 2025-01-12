@@ -1,102 +1,125 @@
-.divContainerSUForm {
+/* Estilos principales ya reutilizados de Sign-in */
+
+.backgroundContainer {
+  height: 100vh;
+  background: var(--background);
+}
+.main {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(to bottom right, var(--white), #e7ebf0);
   padding: 2rem;
+  background: var(--background);
+  min-width: 280px;
 }
 
-.containerSUForm {
+.form {
   background-color: var(--white);
-  border: 1px solid #ddd;
-  padding: 3rem;
-  border-radius: 10px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--input-border);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 500px;
-}
-
-.signUpTitleSUForm {
-  text-align: center;
-  font-size: 2rem;
-  color: var(--black);
-  font-weight: bold;
-  margin-bottom: 1rem;
-}
-
-.alreadyAccountTextSUForm {
-  text-align: center;
-  font-size: 0.9rem;
-  margin-bottom: 2rem;
-}
-
-.signInLinkSUForm {
-  color: var(--strong-green);
-  font-weight: bold;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.signInLinkSUForm:hover {
-  color: var(--light-green);
-  text-decoration: underline;
-}
-
-.inputsContainerSUForm {
+  max-width: 400px;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: 1.5rem;
+  min-width: 280px;
 }
 
-.emailLabelSUForm,
-.firstNameLabelSUForm,
-.lastNameLabelSUForm,
-.ageLabelSUForm,
-.passwordLabelSUForm {
-  font-size: 1rem;
+.title {
+  text-align: center;
+  font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+  font-weight: bold;
+  color: var(--black);
+}
+
+.label {
+  font-size: clamp(0.9rem, 1.5vw, 1rem);
   font-weight: 600;
   color: var(--black);
-  margin-bottom: 0.1rem;
 }
 
-.emailInputSUForm,
-.firstNameInputSUForm,
-.lastNameInputSUForm,
-.ageInputSUForm,
-.passwordInputSUForm {
+.input {
   width: 100%;
   padding: 0.8rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
-.emailInputSUForm:focus,
-.firstNameInputSUForm:focus,
-.lastNameInputSUForm:focus,
-.ageInputSUForm:focus,
-.passwordInputSUForm:focus {
-  border-color: var(--strong-green);
+.input:focus {
+  border-color: var(--input-border-focus);
   outline: none;
-  box-shadow: 0 0 5px var(--light-green);
+  box-shadow: 0 0 6px var(--light-green);
 }
 
-.buttonSUForm {
-  width: 100%;
+.button {
   padding: 0.8rem;
-  background-color: var(--strong-green);
+  background-color: var(--button-bg);
   color: var(--white);
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
-.buttonSUForm:hover {
-  background-color: var(--light-green);
+.button:hover {
+  background-color: var(--button-bg-hover);
+}
+
+.register {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+/* Mensaje de registro movido hacia arriba */
+.register {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+/* Clase opcional para ajustar márgenes del FormMessage si es necesario */
+.formMessage {
+  margin-bottom: 1rem;
+}
+.registerLink {
+  color: var(--strong-green);
+  font-weight: bold;
+}
+.registerLink:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+.passwordRequirements {
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.passwordRequirements h2 {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.passwordRequirements ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.passwordRequirements ul li {
+  margin-bottom: 0.5rem;
 }

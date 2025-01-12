@@ -1,8 +1,11 @@
 "use client";
+
 import styles from "./page.module.css";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { getUserById } from "@/app/actions";
+import FriendCard from "../components/FriendCard/FriendCard";
+import { fetchUserIdByEmail } from "@/app/actions";
 
 type FriendLinkData = {
   linkId: string;
@@ -26,9 +29,7 @@ export default function FriendsPanel() {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      setError(
-        "No hemos podido corroborar su sesión. Intente logueándose nuevamente."
-      );
+      setError("We could not verify your session. Please log in again.");
       return;
     }
 
@@ -38,8 +39,8 @@ export default function FriendsPanel() {
       .or(`first_user_id.eq.${user.id},second_user_id.eq.${user.id}`);
 
     if (error) {
-      console.error("Error al obtener los friend link:", error);
-      setError("Error al obtener los friends links.");
+      console.error("Error fetching friend links:", error);
+      setError("Error fetching friend links.");
       return;
     }
 
@@ -59,7 +60,7 @@ export default function FriendsPanel() {
 
   const handleAddFriend = async () => {
     if (!email) {
-      alert("Por favor, ingresa un email válido.");
+      alert("Please enter a valid email.");
       return;
     }
 
@@ -71,27 +72,20 @@ export default function FriendsPanel() {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        setError(
-          "No hemos podido corroborar su sesión. Intente logueándose nuevamente."
-        );
+        console.error("We could not verify your session. Please log in again.");
+        setError("We could not verify your session. Please log in again.");
         return;
       }
 
-      const { data: invitedId, error } = await supabase
-        .from("users")
-        .select(`id`)
-        .eq("email", email);
-      if (error) {
-        console.error("Error al obtener los usuarios:", error);
-        setError("Error al obtener los usuarios.");
+      const invitedId: string = await fetchUserIdByEmail(email);
+
+      if (!invitedId || invitedId.length === 0) {
+        console.error("No user found with the given email.");
+        setError("No user found with the given email.");
         return;
       }
-      if (!invitedId || invitedId === null) {
-        console.log("No existe un usuario con el email indicado");
-        setError("No existe un usuario con el email indicado");
-        return;
-      }
-      const receiverId = invitedId[0].id;
+
+      const receiverId = invitedId;
       const { error: errorData } = await supabase.from("invitations").insert({
         sender_id: user.id,
         receiver_id: receiverId,
@@ -99,69 +93,62 @@ export default function FriendsPanel() {
       });
 
       if (errorData) {
-        console.log("Error insertando link en la tabla");
-        setError("Error insertando link en la tabla");
+        console.error("Error inserting invitation:", errorData);
+        setError("Error sending friend request.");
       }
 
-      console.log("Enviando solicitud de amistad a:", email);
+      console.log("Friend request sent to:", email);
       setIsModalOpen(false);
-      setEmail(""); // Limpiar el input después de agregar
+      setEmail(""); // Clear the input after submission
     } catch (error) {
-      console.error("Error al agregar amigo:", error);
+      console.error("Error adding friend:", error);
     }
   };
 
   return (
     <div className={styles.friendsPanelContainer}>
+      <h1 className={styles.title}>Friends panel</h1>
       <div className={styles.friendsContainer}>
-        {myFriends.filter((friend) => friend.linkId).length > 0 ? (
-          myFriends
-            .filter((friend) => friend.linkId)
-            .map((friendLink) => {
-              // Se determina quién es el amigo
-              const { linkFUserId, linkSUserId } = friendLink;
-              const friendUserId =
-                linkFUserId !== linkSUserId ? linkFUserId : linkSUserId;
+        {myFriends.length > 0 ? (
+          myFriends.map((friendLink) => {
+            const friendUserId =
+              friendLink.linkFUserId !== friendLink.linkSUserId
+                ? friendLink.linkFUserId
+                : friendLink.linkSUserId;
 
-              return (
-                <div
-                  key={friendLink.linkId}
-                  className={styles.friendLinkDetail}
-                >
-                  <p>Amigo:</p>
-                  <UserDetails userId={friendUserId} />
-                  <p>
-                    Amigos desde:{" "}
-                    {new Date(friendLink.linkData).toLocaleDateString()}
-                  </p>
-                </div>
-              );
-            })
+            return (
+              <UserDetails
+                key={friendLink.linkId}
+                userId={friendUserId}
+                friendSince={friendLink.linkData}
+              />
+            );
+          })
         ) : (
-          <p>No se encontraron amigos.</p>
+          <p className={styles.noFriends}>You don't have any friends yet.</p>
         )}
       </div>
       <button
         className={styles.addFriendButton}
         onClick={() => setIsModalOpen(true)}
       >
-        Agregar amigo
+        Add a Friend
       </button>
 
       {isModalOpen && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
-            <h3>Agregar un amigo</h3>
+            <h3>Add a Friend</h3>
             <input
               type="email"
-              placeholder="Ingresa el email del amigo"
+              placeholder="Enter your friend's email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={styles.emailInput}
             />
             <div className={styles.modalActions}>
-              <button onClick={handleAddFriend}>Agregar</button>
-              <button onClick={() => setIsModalOpen(false)}>Cancelar</button>
+              <button onClick={handleAddFriend}>Add</button>
+              <button onClick={() => setIsModalOpen(false)}>Cancel</button>
             </div>
           </div>
         </div>
@@ -170,7 +157,13 @@ export default function FriendsPanel() {
   );
 }
 
-const UserDetails = ({ userId }: { userId: string }) => {
+const UserDetails = ({
+  userId,
+  friendSince,
+}: {
+  userId: string;
+  friendSince: string;
+}) => {
   const [userDetails, setUserDetails] = useState<any | null>(null);
 
   useEffect(() => {
@@ -182,22 +175,18 @@ const UserDetails = ({ userId }: { userId: string }) => {
     fetchUserDetails();
   }, [userId]);
 
+  if (!userDetails) {
+    return <p>Loading friend details...</p>;
+  }
+
   return (
-    <div>
-      {userDetails ? (
-        <>
-          <p>
-            Nombre: {userDetails.first_name} {userDetails.last_name}
-          </p>
-          <p>Email: {userDetails.email}</p>
-          <p>
-            Miembro desde:{" "}
-            {new Date(userDetails.created_at).toLocaleDateString()}
-          </p>
-        </>
-      ) : (
-        <p>Cargando detalles del amigo...</p>
-      )}
-    </div>
+    <FriendCard
+      firstName={userDetails.first_name}
+      lastName={userDetails.last_name}
+      email={userDetails.email}
+      profilePicture={userDetails.profile_picture || ""}
+      created_at={userDetails.created_at}
+      friend_since={new Date(friendSince)}
+    />
   );
 };

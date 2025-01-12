@@ -10,45 +10,46 @@ export default async function ForgotPassword(props: {
   searchParams: Promise<Message>;
 }) {
   const searchParams = await props.searchParams;
-
   const isSuccess = "success" in searchParams;
+
   return (
-    <div className={styles.divContainerFPForm}>
-      <form className={styles.containerFPForm}>
-        <div className={styles.headerFPForm}>
-          <h1 className={styles.titleFPForm}>Reset Password</h1>
-          <p className={styles.alreadyAccountTextFPForm}>
+    <main className={styles.container}>
+      <form className={styles.form}>
+        <header className={styles.header}>
+          <h1 className={styles.title}>Reset Password</h1>
+          <p className={styles.subtext}>
             Already have an account?{" "}
-            <Link className={styles.signInLinkFPForm} href="/sign-in">
+            <Link className={styles.link} href="/sign-in">
               Sign in
             </Link>
           </p>
-        </div>
+        </header>
 
-        <div className={styles.inputsContainerFPForm}>
+        <div className={styles.formBody}>
           {!isSuccess && (
             <>
-              <label htmlFor="email" className={styles.emailLabelFPForm}>
+              <label htmlFor="email" className={styles.label}>
                 Email
               </label>
               <input
+                type="email"
+                id="email"
                 name="email"
                 placeholder="you@example.com"
                 required
-                className={styles.emailInputFPForm}
+                className={styles.input}
               />
               <button
-                className={styles.buttonFPForm}
+                className={styles.button}
                 formAction={forgotPasswordAction}
               >
                 Reset Password
               </button>
             </>
           )}
-
           <FormMessage message={searchParams} />
         </div>
       </form>
-    </div>
+    </main>
   );
 }

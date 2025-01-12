@@ -3,62 +3,58 @@
 import { useState, useEffect } from "react";
 import { createProject } from "@/app/actions";
 import styles from "./page.module.css";
-import { createClient } from "@/utils/supabase/client";
+import { getUserGroups } from "@/app/actions";
 
 type GroupData = {
-  groupId: string;
+  id: string;
+  name: string;
 };
 
 export default function ProjectForm() {
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
-  const [isPublic, setIsPublic] = useState<boolean>(false);
+  const [isPublic, setIsPublic] = useState<boolean>(true);
   const [myGroups, setMyGroups] = useState<GroupData[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
-  const getUserGroups = async () => {
-    const supabase = createClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      setError(
-        "No hemos podido corroborar su sesión. Intente logueándose nuevamente."
-      );
-      return;
-    }
-
-    const { data: groupsFound, error: groupsError } = await supabase
-      .from("group_members")
-      .select(`group_id`)
-      .eq("user_id", user.id)
-      .in("role", ["author", "admin"]);
-
-    if (groupsError) {
-      console.error("Error al obtener los grupos:", groupsError);
-      setError("Error al obtener los grupos.");
-      return;
-    }
-
-    const formattedGroups: GroupData[] = groupsFound.map((group) => ({
-      groupId: group.group_id,
-    }));
-
-    setMyGroups(formattedGroups);
-  };
-
   useEffect(() => {
-    getUserGroups();
+    const fetchGroups = async () => {
+      const groups = await getUserGroups();
+      setMyGroups(groups);
+    };
+
+    fetchGroups();
   }, []);
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      await createProject(
+        projectName,
+        projectDescription,
+        isPublic,
+        selectedGroup
+      );
+      // Reset form or show success message
+      setProjectName("");
+      setProjectDescription("");
+      setIsPublic(true); // Restablecer a 'true'
+      setSelectedGroup("");
+      setError(null);
+    } catch (error) {
+      setError("Error creating the project. Please try again.");
+    }
+  };
+
   return (
-    <form className={styles.form}>
+    <form className={styles.form} onSubmit={handleSubmit}>
+      <h2 className={styles.title}>Create new project</h2>
+      {error && <p className={styles.error}>{error}</p>}
       <div className={styles.formGroup}>
         <label htmlFor="projectName" className={styles.label}>
-          Nombre del proyecto:
+          Project Name:
         </label>
         <input
           id="projectName"
@@ -67,14 +63,14 @@ export default function ProjectForm() {
           value={projectName}
           onChange={(e) => setProjectName(e.target.value)}
           className={styles.input}
-          placeholder="Escribe el nombre del proyecto"
+          placeholder="Enter the project name"
           required
         />
       </div>
 
       <div className={styles.formGroup}>
-        <label htmlFor="description" className={styles.label}>
-          Descripción del proyecto (opcional):
+        <label htmlFor="projectDescription" className={styles.label}>
+          Project Description (optional):
         </label>
         <textarea
           id="projectDescription"
@@ -82,50 +78,58 @@ export default function ProjectForm() {
           value={projectDescription}
           onChange={(e) => setProjectDescription(e.target.value)}
           className={styles.textarea}
-          placeholder="Escribe una descripción"
+          placeholder="Enter a description"
         />
       </div>
 
       <div className={styles.formGroup}>
-        <label htmlFor="isPublic" className={styles.label}>
-          ¿Es público?
-        </label>
-        <input
-          id="isPublic"
-          name="isPublic"
-          type="checkbox"
-          checked={isPublic}
-          onChange={(e) => setIsPublic(e.target.checked)}
-          className={styles.checkbox}
-        />
+        <label className={styles.label}>Project Type:</label>
+        <div className={styles.radioGroup}>
+          <label className={styles.radioLabel}>
+            <input
+              type="radio"
+              name="projectType"
+              checked={isPublic}
+              onChange={() => setIsPublic(true)}
+              className={styles.radioInput}
+            />
+            Public
+          </label>
+          <label className={styles.radioLabel}>
+            <input
+              type="radio"
+              name="projectType"
+              checked={!isPublic}
+              onChange={() => setIsPublic(false)}
+              className={styles.radioInput}
+            />
+            Private
+          </label>
+        </div>
       </div>
 
       <div className={styles.formGroup}>
         <label htmlFor="group" className={styles.label}>
-          Seleccionar grupo (opcional):
+          Select Group (optional):
         </label>
         <select
           id="group"
           name="group"
           value={selectedGroup}
-          onChange={(e) => setSelectedGroup(e.target.value)} // Actualiza el estado local
+          onChange={(e) => setSelectedGroup(e.target.value)}
           className={styles.select}
         >
-          <option value="none">Ninguno</option>
+          <option value="">None</option>
           {myGroups.map((group) => (
-            <option key={group.groupId} value={group.groupId}>
-              {group.groupId}
+            <option key={group.id} value={group.id}>
+              {group.name}
             </option>
           ))}
         </select>
       </div>
 
-      <button
-        type="submit"
-        className={styles.submitButton}
-        formAction={createProject}
-      >
-        Crear proyecto
+      <button type="submit" className={styles.submitButton}>
+        Create Project
       </button>
     </form>
   );

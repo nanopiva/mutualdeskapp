@@ -8,6 +8,7 @@ import { Bungee_Inline } from "next/font/google";
 import { createClient } from "@/utils/supabase/client";
 import { useState, useEffect } from "react";
 import AvatarIcon from "../AvatarIcon/AvatarIcon";
+import { Menu } from "lucide-react"; // Importa el icono de hamburguesa
 
 import {
   DropdownMenu,
@@ -18,14 +19,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
 const bungee = Bungee_Inline({
   subsets: ["latin"],
   weight: "400",
 });
 
-export default function Header() {
+export default function Header({
+  toggleSidebar,
+}: {
+  toggleSidebar: () => void;
+}) {
   const supabase = createClient();
   const [user, setUser] = useState<any>(null);
   const [firstName, setFirstName] = useState("");
@@ -61,6 +64,9 @@ export default function Header() {
   return (
     <nav className={styles.headerNav}>
       <div className={styles.headerNavbarLogoContainer}>
+        <button className={styles.menuButton} onClick={toggleSidebar}>
+          <Menu size={24} />
+        </button>
         <Link href="/dashboard" passHref>
           <Image
             className={styles.headerNavbarLogo}

@@ -3,21 +3,34 @@
 import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 import { createClient } from "@/utils/supabase/client";
+import {
+  getUserById,
+  acceptInvitation,
+  declineInvitation,
+  getGroupName,
+} from "@/app/actions";
 
-// Tipo para las invitaciones
 type Invitation = {
   invitationId: string;
   invitationSenderId: string;
   invitationReceiverId: string;
-  invitationGroupId: string;
+  invitationGroupId: string | null;
   invitationProjectId: string | null;
   invitationDate: string;
   invitationRole: string;
 };
 
+type User = {
+  first_name: string;
+  last_name: string;
+  email: string;
+};
+
 export default function Invitations() {
-  const [invitations, setInvitations] = useState<Invitation[]>([]); // Especificar tipo de arreglo
-  const [error, setError] = useState<string | null>(null); // Error puede ser string o null
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [userDetails, setUserDetails] = useState<Record<string, User>>({});
+  const [groupNames, setGroupNames] = useState<Record<string, string>>({});
+  const [error, setError] = useState<string | null>(null);
 
   const fetchInvitations = async () => {
     const supabase = await createClient();
@@ -28,9 +41,7 @@ export default function Invitations() {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      setError(
-        "No hemos podido corroborar su sesión. Intente logueándose nuevamente."
-      );
+      setError("We couldn't verify your session. Please log in again.");
       return;
     }
 
@@ -40,8 +51,8 @@ export default function Invitations() {
       .eq("receiver_id", user.id);
 
     if (error) {
-      console.error("Error al obtener las invitaciones:", error);
-      setError("Error al obtener las invitaciones.");
+      console.error("Error fetching invitations:", error);
+      setError("Error fetching invitations.");
       return;
     }
 
@@ -56,137 +67,51 @@ export default function Invitations() {
     }));
 
     setInvitations(formattedInvitations);
+
+    // Fetch details of the users involved
+    const uniqueSenderIds = [...new Set(data.map((inv) => inv.sender_id))];
+    const userFetchPromises = uniqueSenderIds.map((id) => getUserById(id));
+
+    try {
+      const users = await Promise.all(userFetchPromises);
+      const userMap = users.reduce(
+        (acc, user) => {
+          acc[user.id] = user;
+          return acc;
+        },
+        {} as Record<string, User>
+      );
+      setUserDetails(userMap);
+    } catch (fetchError) {
+      console.error("Error fetching user data:", fetchError);
+      setError("Error loading user data.");
+    }
+
+    // Fetch group names
+    const uniqueGroupIds = [
+      ...new Set(data.map((inv) => inv.group_id).filter(Boolean)),
+    ];
+    const groupFetchPromises = uniqueGroupIds.map((id) => getGroupName(id));
+
+    try {
+      const groups = await Promise.all(groupFetchPromises);
+      const groupMap = uniqueGroupIds.reduce(
+        (acc, id, index) => {
+          acc[id] = groups[index];
+          return acc;
+        },
+        {} as Record<string, string>
+      );
+      setGroupNames(groupMap);
+    } catch (groupFetchError) {
+      console.error("Error fetching group data:", groupFetchError);
+      setError("Error loading group data.");
+    }
   };
 
   useEffect(() => {
     fetchInvitations();
   }, []);
-
-  const handleAcceptGroupInvitation = async (
-    invitationId: string,
-    invitationReceiverId: string,
-    invitationGroupId: string,
-    invitationRole: string
-  ) => {
-    const supabase = await createClient();
-
-    try {
-      // Agregar usuario al grupo:
-      const { error: addMemberError } = await supabase
-        .from("group_members")
-        .insert({
-          group_id: invitationGroupId,
-          role: invitationRole,
-          user_id: invitationReceiverId, // Asegúrate de que el campo sea correcto
-        });
-
-      if (addMemberError) {
-        console.error(
-          "Error al añadir miembro al grupo:",
-          JSON.stringify(addMemberError, null, 2)
-        );
-        return;
-      }
-
-      // Eliminar la invitación de la base de datos
-      const { error: deleteInvitationError } = await supabase
-        .from("invitations")
-        .delete()
-        .eq("id", invitationId);
-
-      if (deleteInvitationError) {
-        console.error(
-          "Error al eliminar la invitación:",
-          deleteInvitationError
-        );
-        return;
-      }
-
-      // Actualizar el estado local eliminando la invitación aceptada
-      setInvitations((prevInvitations) =>
-        prevInvitations.filter(
-          (invitation) => invitation.invitationId !== invitationId
-        )
-      );
-    } catch (err) {
-      console.error("Error inesperado al aceptar la invitación:", err);
-    }
-  };
-
-  const handleRejectGroupInvitation = async (invitationId: string) => {
-    const supabase = createClient();
-
-    try {
-      // Eliminar la invitación de la base de datos
-      const { error } = await supabase
-        .from("invitations")
-        .delete()
-        .eq("id", invitationId);
-
-      if (error) {
-        console.error("Error al rechazar la invitación:", error);
-        return;
-      }
-
-      // Actualizar el estado local eliminando la invitación rechazada
-      setInvitations((prevInvitations) =>
-        prevInvitations.filter(
-          (invitation) => invitation.invitationId !== invitationId
-        )
-      );
-    } catch (err) {
-      console.error("Error inesperado al rechazar la invitación:", err);
-    }
-  };
-
-  const handleAcceptFriendInvitation = async (
-    invitationId: string,
-    invitationSenderId: string,
-    invitationReceiverId: string
-  ) => {
-    const supabase = await createClient();
-
-    try {
-      // Agregar friend link:
-      const { error: addLinkError } = await supabase
-        .from("friends_links")
-        .insert({
-          first_user_id: invitationSenderId,
-          second_user_id: invitationReceiverId,
-        });
-
-      if (addLinkError) {
-        console.error(
-          "Error al añadir miembro al grupo:",
-          JSON.stringify(addLinkError, null, 2)
-        );
-        return;
-      }
-
-      // Eliminar la invitación de la base de datos
-      const { error: deleteInvitationError } = await supabase
-        .from("invitations")
-        .delete()
-        .eq("id", invitationId);
-
-      if (deleteInvitationError) {
-        console.error(
-          "Error al eliminar la invitación:",
-          deleteInvitationError
-        );
-        return;
-      }
-
-      // Actualizar el estado local eliminando la invitación aceptada
-      setInvitations((prevInvitations) =>
-        prevInvitations.filter(
-          (invitation) => invitation.invitationId !== invitationId
-        )
-      );
-    } catch (err) {
-      console.error("Error inesperado al aceptar la invitación:", err);
-    }
-  };
 
   if (error) {
     return <p>{error}</p>;
@@ -194,119 +119,165 @@ export default function Invitations() {
 
   return (
     <div className={styles.invitationsContainer}>
-      {/* Invitaciones de grupo */}
-      <h2>Group Invitations:</h2>
+      {/* Group Invitations */}
+      <h2 className={styles.h2}>Group Invitations:</h2>
       <div className={styles.groupInvitationsContainer}>
         {invitations.filter((inv) => inv.invitationGroupId).length > 0 ? (
           invitations
             .filter((inv) => inv.invitationGroupId)
-            .map((invitation) => (
-              <div
-                key={invitation.invitationId}
-                className={styles.invitationDetail}
-              >
-                <p>Id del invitador: {invitation.invitationSenderId}</p>
-                <p>Id del grupo invitado: {invitation.invitationGroupId}</p>
-                <p>Rol: {invitation.invitationRole}</p>
-                <p>
-                  Enviada el:{" "}
-                  {new Date(invitation.invitationDate).toLocaleDateString()}
-                </p>
-                <button
-                  onClick={() => {
-                    handleAcceptGroupInvitation(
-                      invitation.invitationId,
-                      invitation.invitationReceiverId,
-                      invitation.invitationGroupId,
-                      invitation.invitationRole
-                    );
-                  }}
+            .map((invitation) => {
+              const sender = userDetails[invitation.invitationSenderId];
+              const groupName = invitation.invitationGroupId
+                ? groupNames[invitation.invitationGroupId] || "Loading..."
+                : "Unknown";
+
+              return (
+                <div
+                  key={invitation.invitationId}
+                  className={`${styles.invitationDetail} ${styles.responsiveInvitation}`}
                 >
-                  Aceptar
-                </button>
-                <button
-                  onClick={() => {
-                    handleRejectGroupInvitation(invitation.invitationId);
-                  }}
-                >
-                  Rechazar
-                </button>
-              </div>
-            ))
+                  <h3>Group Invitation</h3>
+                  <p className={styles.p}>
+                    Invited by: {sender?.first_name} {sender?.last_name} (
+                    {sender?.email})
+                  </p>
+                  <p className={styles.p}>Group name: {groupName}</p>
+                  <p className={styles.p}>Role: {invitation.invitationRole}</p>
+                  <p className={styles.p}>
+                    Sent on:{" "}
+                    {new Date(invitation.invitationDate).toLocaleDateString()}
+                  </p>
+                  <div className={styles.acceptDeclineButtons}>
+                    <button
+                      onClick={() =>
+                        acceptInvitation(
+                          invitation.invitationGroupId,
+                          invitation.invitationProjectId,
+                          invitation.invitationRole,
+                          invitation.invitationId,
+                          invitation.invitationSenderId
+                        )
+                      }
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => declineInvitation(invitation.invitationId)}
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              );
+            })
         ) : (
-          <p>No se encontraron invitaciones de grupo.</p>
+          <p className={styles.p}>No group invitations found.</p>
         )}
       </div>
 
-      {/* Invitaciones de proyecto */}
-      <h2>Project Invitations:</h2>
+      {/* Project Invitations */}
+      <h2 className={styles.h2}>Project Invitations:</h2>
       <div className={styles.projectInvitationsContainer}>
         {invitations.filter((inv) => inv.invitationProjectId).length > 0 ? (
           invitations
             .filter((inv) => inv.invitationProjectId)
-            .map((invitation) => (
-              <div
-                key={invitation.invitationId}
-                className={styles.invitationDetail}
-              >
-                <p>Id del invitador: {invitation.invitationSenderId}</p>
-                <p>
-                  Id del proyecto invitado: {invitation.invitationProjectId}
-                </p>
-                <p>Rol: {invitation.invitationRole}</p>
-                <p>
-                  Enviada el:{" "}
-                  {new Date(invitation.invitationDate).toLocaleDateString()}
-                </p>
-                <button>Aceptar</button>
-                <button>Rechazar</button>
-              </div>
-            ))
+            .map((invitation) => {
+              const sender = userDetails[invitation.invitationSenderId];
+              return (
+                <div
+                  key={invitation.invitationId}
+                  className={`${styles.invitationDetail} ${styles.responsiveInvitation}`}
+                >
+                  <h3>Project Invitation</h3>
+                  <p className={styles.p}>
+                    Invited by: {sender?.first_name} {sender?.last_name} (
+                    {sender?.email})
+                  </p>
+                  <p className={styles.p}>
+                    Project ID: {invitation.invitationProjectId}
+                  </p>
+                  <p className={styles.p}>Role: {invitation.invitationRole}</p>
+                  <p className={styles.p}>
+                    Sent on:{" "}
+                    {new Date(invitation.invitationDate).toLocaleDateString()}
+                  </p>
+                  <div className={styles.acceptDeclineButtons}>
+                    <button
+                      onClick={() =>
+                        acceptInvitation(
+                          invitation.invitationGroupId,
+                          invitation.invitationProjectId,
+                          invitation.invitationRole,
+                          invitation.invitationId,
+                          invitation.invitationSenderId
+                        )
+                      }
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => declineInvitation(invitation.invitationId)}
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              );
+            })
         ) : (
-          <p>No se encontraron invitaciones de proyecto.</p>
+          <p className={styles.p}>No project invitations found.</p>
         )}
       </div>
 
-      {/* Invitaciones de amigo */}
-      <h2>Friend Invitations:</h2>
+      {/* Friend Invitations */}
+      <h2 className={styles.h2}>Friend Invitations:</h2>
       <div className={styles.friendInvitationsContainer}>
         {invitations.filter(
           (inv) => !inv.invitationGroupId && !inv.invitationProjectId
         ).length > 0 ? (
           invitations
             .filter((inv) => !inv.invitationGroupId && !inv.invitationProjectId)
-            .map((invitation) => (
-              <div
-                key={invitation.invitationId}
-                className={styles.invitationDetail}
-              >
-                <p>Id del invitador: {invitation.invitationSenderId}</p>
-                <p>
-                  Enviada el:{" "}
-                  {new Date(invitation.invitationDate).toLocaleDateString()}
-                </p>
-                <button
-                  onClick={() => {
-                    handleAcceptFriendInvitation(
-                      invitation.invitationId,
-                      invitation.invitationSenderId,
-                      invitation.invitationReceiverId
-                    );
-                  }}
+            .map((invitation) => {
+              const sender = userDetails[invitation.invitationSenderId];
+              return (
+                <div
+                  key={invitation.invitationId}
+                  className={`${styles.invitationDetail} ${styles.responsiveInvitation}`}
                 >
-                  Aceptar
-                </button>
-                <button
-                  onClick={() => {
-                    handleRejectGroupInvitation(invitation.invitationId);
-                  }}
-                >
-                  Rechazar
-                </button>
-              </div>
-            ))
+                  <h3>Friend Invitation</h3>
+                  <p className={styles.p}>
+                    Invited by: {sender?.first_name} {sender?.last_name} (
+                    {sender?.email})
+                  </p>
+                  <p className={styles.p}>
+                    Sent on:{" "}
+                    {new Date(invitation.invitationDate).toLocaleDateString()}
+                  </p>
+                  <div className={styles.acceptDeclineButtons}>
+                    <button
+                      onClick={() =>
+                        acceptInvitation(
+                          invitation.invitationGroupId,
+                          invitation.invitationProjectId,
+                          invitation.invitationRole,
+                          invitation.invitationId,
+                          invitation.invitationSenderId
+                        )
+                      }
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => declineInvitation(invitation.invitationId)}
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              );
+            })
         ) : (
-          <p>No se encontraron invitaciones de amigos.</p>
+          <p className={styles.p}>No friend invitations found.</p>
         )}
       </div>
     </div>

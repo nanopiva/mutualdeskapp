@@ -1,0 +1,76 @@
+.card {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px solid #ccc; /* Borde gris */
+  border-radius: 8px;
+  padding: 1rem;
+  max-width: 90%; /* Reduce el ancho máximo de la tarjeta */
+  margin: 0 auto; /* Centra la tarjeta horizontalmente */
+  box-sizing: border-box;
+  overflow: hidden; /* Asegurarse de que el contenido no se desborde */
+}
+
+.details {
+  margin-left: 1rem;
+  flex: 1;
+  overflow: hidden; /* Prevenir desbordamiento de contenido */
+}
+
+.name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+  overflow: hidden; /* Cortar texto si es demasiado largo */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.email {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0.25rem 0;
+  overflow: hidden; /* Cortar texto si es demasiado largo */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.role {
+  font-size: 0.9rem;
+  color: #777;
+  margin: 0.25rem 0;
+  overflow: hidden; /* Cortar texto si es demasiado largo */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.memberSinceContainer {
+  margin-top: 0.5rem;
+}
+
+.memberSince {
+  font-size: 0.8rem;
+  color: #666;
+  word-wrap: break-word; /* Ajustar texto largo */
+}
+
+.date {
+  font-weight: bold;
+}
+
+@media (max-width: 400px) {
+  .details {
+    margin-left: 0.5rem;
+  }
+
+  .name {
+    font-size: 1rem;
+  }
+
+  .email,
+  .role,
+  .memberSince {
+    font-size: 0.8rem;
+  }
+}

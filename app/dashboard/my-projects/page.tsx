@@ -18,16 +18,17 @@ type Project = {
   updated_at?: string;
   is_public?: boolean;
   author_id?: string;
+  contentSnippet: string;
 };
 
 export default function MyProjects() {
   const [userProjects, setUserProjects] = useState<Project[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const getProjects = async () => {
+    setLoading(true);
     const supabase = await createClient();
-
-    // Obtener usuario autenticado
     const {
       data: { user },
       error: userError,
@@ -37,10 +38,10 @@ export default function MyProjects() {
       setError(
         "No hemos podido corroborar su sesión. Intente logueándose nuevamente."
       );
+      setLoading(false);
       return;
     }
 
-    // Obtener los proyectos en los que el usuario es miembro
     const { data: projectMembersData, error: projectMembersError } =
       await supabase
         .from("project_members")
@@ -48,38 +49,44 @@ export default function MyProjects() {
         .eq("user_id", user.id);
 
     if (projectMembersError) {
-      console.error(
-        "Error al obtener los miembros del proyecto: ",
-        projectMembersError
-      );
       setError("Error al obtener los miembros del proyecto");
+      setLoading(false);
       return;
     }
 
-    if (!projectMembersData) return;
-
-    // Obtener detalles de cada proyecto en base a los project_id
     const projectIds = projectMembersData.map((pm) => pm.project_id);
-
     const { data: projectsData, error: projectsError } = await supabase
       .from("projects")
       .select(
-        `id, name, description, created_at, updated_at, is_public, author_id`
+        `id, name, description, created_at, updated_at, is_public, author_id,content`
       )
       .in("id", projectIds);
 
     if (projectsError) {
-      console.error(
-        "Error al obtener detalles de los proyectos: ",
-        projectsError
-      );
       setError("Error al obtener detalles de los proyectos");
+      setLoading(false);
       return;
     }
+    const extractTextFromContent = (content: any): string => {
+      if (!content?.root?.children) return "Empty project";
 
-    // Combinar datos de project_members y projects
+      // Intenta obtener el texto del primer párrafo
+      const firstParagraph = content.root.children.find(
+        (child: any) => child.type === "paragraph"
+      );
+
+      if (!firstParagraph?.children) return "Empty project";
+
+      const textNode = firstParagraph.children.find(
+        (child: any) => child.type === "text" && child.text
+      );
+
+      return textNode?.text?.slice(0, 120) || "Empty project";
+    };
+
     const formattedProjects: Project[] = projectMembersData.map((pm) => {
       const projectDetails = projectsData?.find((p) => p.id === pm.project_id);
+      const contentSnippet = extractTextFromContent(projectDetails?.content);
       return {
         id: pm.id,
         projectId: pm.project_id,
@@ -91,15 +98,13 @@ export default function MyProjects() {
         updated_at: projectDetails?.updated_at,
         is_public: projectDetails?.is_public,
         author_id: projectDetails?.author_id,
+        contentSnippet,
       };
     });
 
     setUserProjects(formattedProjects);
+    setLoading(false);
   };
-
-  useEffect(() => {
-    getProjects();
-  }, []);
 
   useEffect(() => {
     getProjects();
@@ -123,47 +128,57 @@ export default function MyProjects() {
         </Link>
       </div>
 
-      <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>Proyectos de Grupo</h2>
-        {groupProjects.length > 0 ? (
-          <div className={styles.projectGrid}>
-            {groupProjects.map((project) => (
-              <ProjectCard
-                key={`${project.projectId}-${project.projectGroupId}`}
-                id={project.projectId}
-                name={project.name}
-                role={project.projectRole}
-                isGroup={true}
-              />
-            ))}
+      {loading ? (
+        <div className={styles.loader}></div>
+      ) : (
+        <>
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Proyectos de Grupo</h2>
+            {groupProjects.length > 0 ? (
+              <div className={styles.projectGrid}>
+                {groupProjects.map((project) => (
+                  <ProjectCard
+                    key={`${project.projectId}-${project.projectGroupId}`}
+                    id={project.projectId}
+                    name={project.name}
+                    role={project.projectRole}
+                    isGroup={true}
+                    isPublic={project.is_public}
+                    contentSnippet={project.contentSnippet}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className={styles.noProjects}>
+                No se encontraron proyectos de grupo
+              </p>
+            )}
           </div>
-        ) : (
-          <p className={styles.noProjects}>
-            No se encontraron proyectos de grupo
-          </p>
-        )}
-      </div>
 
-      <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>Proyectos Individuales</h2>
-        {individualProjects.length > 0 ? (
-          <div className={styles.projectGrid}>
-            {individualProjects.map((project) => (
-              <ProjectCard
-                key={`${project.projectId}-${project.id}`}
-                id={project.projectId}
-                name={project.name}
-                role={project.projectRole}
-                isGroup={false}
-              />
-            ))}
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Proyectos Individuales</h2>
+            {individualProjects.length > 0 ? (
+              <div className={styles.projectGrid}>
+                {individualProjects.map((project) => (
+                  <ProjectCard
+                    key={`${project.projectId}-${project.id}`}
+                    id={project.projectId}
+                    name={project.name}
+                    role={project.projectRole}
+                    isGroup={false}
+                    isPublic={project.is_public}
+                    contentSnippet={project.contentSnippet}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className={styles.noProjects}>
+                No se encontraron proyectos individuales
+              </p>
+            )}
           </div>
-        ) : (
-          <p className={styles.noProjects}>
-            No se encontraron proyectos en los cuales seas integrante
-          </p>
-        )}
-      </div>
+        </>
+      )}
 
       {error && <p className={styles.error}>{error}</p>}
     </div>

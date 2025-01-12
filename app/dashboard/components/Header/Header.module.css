@@ -58,3 +58,26 @@
   color: #248232; /* Color destacado al hover */
   cursor: pointer;
 }
+
+.menuButton {
+  display: none; /* Oculto por defecto en desktop */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 1rem;
+}
+
+@media (max-width: 768px) {
+  .menuButton {
+    display: block; /* Visible en mobile */
+  }
+
+  .headerNavbarLogo {
+    display: none; /* Oculta el logo en mobile */
+  }
+
+  .headerTitle {
+    font-size: 24px; /* Reduce el tamaño del título en mobile */
+  }
+}

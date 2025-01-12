@@ -1,66 +1,180 @@
-.form {
-  max-width: 400px;
+.createGroupContainer {
+  max-width: 550px;
   margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ddd;
+  padding: 2rem;
+  background-color: #ffffff;
   border-radius: 8px;
-  background-color: #f9f9f9;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .formGroup {
-  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .label {
-  display: block;
-  margin-bottom: 8px;
   font-weight: bold;
-  color: #333;
+  color: #555;
 }
 
 .input,
 .textarea {
   width: 100%;
-  padding: 10px;
+  padding: 0.75rem;
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 1rem;
 }
 
 .textarea {
+  min-height: 100px;
   resize: vertical;
-  min-height: 80px;
 }
 
 .radioGroup {
   display: flex;
-  gap: 10px;
+  gap: 1rem;
 }
 
 .radioLabel {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 14px;
+  gap: 0.5rem;
+  cursor: pointer;
 }
 
-.radio {
-  margin: 0;
+.radioInput {
+  cursor: pointer;
 }
 
-.submitButton {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  background-color: #0070f3;
+.friendsList {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+.friendItem {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.friendItem:last-child {
+  border-bottom: none;
+}
+
+.friendCheckbox {
+  margin-right: 0.5rem;
+}
+
+.friendLabel {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.friendName {
+  font-weight: bold;
+}
+
+.friendEmail {
+  font-size: 0.9rem;
+  color: #777;
+}
+
+.emailInputGroup {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.addButton,
+.removeButton {
+  padding: 0.5rem 1rem;
+  background-color: var(--strong-green);
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
+  transition: background-color 0.3s;
+}
+
+.addButton:hover,
+.removeButton:hover {
+  background-color: var(--light-green);
+}
+
+.removeButton {
+  background-color: #f44336;
+  font-size: 1.2rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.removeButton:hover {
+  background-color: #d32f2f;
+}
+
+.emailList {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.emailItem {
+  display: flex;
+  align-items: center;
+  background-color: #e0e0e0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.emailText {
+  margin-right: 0.5rem;
+}
+
+.submitButton {
+  padding: 1rem;
+  background-color: var(--strong-green);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .submitButton:hover {
-  background-color: #005bb5;
+  background-color: var(--light-green);
+}
+
+.error {
+  color: #f44336;
+  margin-bottom: 1rem;
+}
+
+.success {
+  color: #4caf50;
+  margin-bottom: 1rem;
+}
+
+.disabledFriend {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

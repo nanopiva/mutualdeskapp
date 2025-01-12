@@ -8,6 +8,13 @@
   --light-green: #2ba84a;
   --strong-green: #248232;
   --white: #fcfffc;
+  --background: linear-gradient(to bottom right, var(--white), #f0f4f8);
+  --input-border: #ccc;
+  --input-border-focus: var(--strong-green);
+  --button-bg: var(--strong-green);
+  --button-bg-hover: var(--light-green);
+  --link-color: var(--strong-green);
+  --link-hover: var(--light-green);
 }
 
 * {
