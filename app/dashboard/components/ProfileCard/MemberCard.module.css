@@ -38,7 +38,7 @@
 
 .role {
   font-size: clamp(1rem, 2vw, 1.2rem);
-  color: var(--white);
+  color: var(--black);
   font-weight: 600;
 }
 
