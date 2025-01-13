@@ -2,30 +2,31 @@ import { createClient } from "@/utils/supabase/server";
 import GroupIdDashboard from "../../components/GroupIdDashboard/GroupIdDashboard";
 import styles from "./page.module.css";
 
-type Params = { groupId: string };
+type Params = Promise<{ groupId: string }>;
 
-export default async function GroupPage({ params }: { params: Params }) {
-  const { groupId } = await params;
+export default async function GroupPage(props: { params: Params }) {
+  const params = await props.params;
+  const groupId = params.groupId;
   const supabase = await createClient();
 
   try {
     const [groupData, groupMembersData, invitationsData, groupProjectsData] =
       await Promise.all([
-        await supabase
+        supabase
           .from("groups")
           .select("id, name, description, created_at, creator_id")
           .eq("id", groupId)
           .single(),
-        await supabase
+        supabase
           .from("group_members")
           .select("user_id, role")
           .eq("group_id", groupId),
-        await supabase
+        supabase
           .from("invitations")
           .select("sender_id, receiver_id, role, created_at")
           .eq("group_id", groupId)
           .eq("status", "pending"),
-        await supabase
+        supabase
           .from("projects")
           .select("id, name, is_public, content")
           .eq("group_id", groupId),
