@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import styles from "./UsersInProject.module.css";
 import { createClient } from "@/utils/supabase/client";
-import { getUserById } from "@/app/actions";
+import { getUserById, verifyUserRole, verifyUserAuthor } from "@/app/actions";
 import AvatarIcon from "../AvatarIcon/AvatarIcon";
-import { verifyUserRole } from "@/app/actions";
-import { verifyUserAuthor } from "@/app/actions";
+import Link from "next/link";
 
 interface UsersInProjectProps {
   projectId: string;
@@ -59,74 +58,67 @@ export default function UsersInProject({
         setError("No se pudieron cargar los usuarios del proyecto.");
       }
     };
-    const checkUserRole = async () => {
-      const userRole = await verifyUserRole(currentUserId, projectId);
-      setIsUserAdmin(userRole === "admin");
-    };
-    const checkUserAuthor = async () => {
-      const authorId = await verifyUserAuthor(currentUserId, projectId);
-      setIsUserAuthor(authorId === currentUserId);
+
+    const checkUserRoles = async () => {
+      try {
+        const [userRole, authorId] = await Promise.all([
+          verifyUserRole(currentUserId, projectId),
+          verifyUserAuthor(currentUserId, projectId),
+        ]);
+
+        setIsUserAdmin(userRole === "admin");
+        setIsUserAuthor(authorId === currentUserId);
+      } catch (err) {
+        console.error("Error verifying user roles:", err);
+        setError("No se pudieron verificar los roles del usuario.");
+      }
     };
 
     fetchUsers();
-    checkUserRole();
-    checkUserAuthor();
+    checkUserRoles();
   }, [projectId, currentUserId]);
-
-  useEffect(() => {
-    setError(null);
-  }, [users]);
 
   const toggleMenu = (userId: string) => {
     setMenuOpen((prev) => ({ ...prev, [userId]: !prev[userId] }));
   };
 
   const removeUser = async (userId: string) => {
-    const supabase = await createClient();
     try {
-      console.log("Deleting user:", userId, "from project:", projectId);
-
-      const { data, error } = await supabase
+      const supabase = createClient();
+      const { error } = await supabase
         .from("project_members")
         .delete()
         .eq("user_id", userId)
         .eq("project_id", projectId);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log("User successfully removed.");
       setUsers((prev) => prev.filter((user) => user.id !== userId));
-    } catch (error) {
-      console.error("Error removing user:", error);
+    } catch (err) {
+      console.error("Error removing user:", err);
       setError("No se pudo eliminar al usuario del proyecto.");
     }
   };
 
   const updateUserRole = async (userId: string, newRole: string) => {
-    const supabase = await createClient();
     try {
-      const { data, error } = await supabase
+      const supabase = createClient();
+      const { error } = await supabase
         .from("project_members")
         .update({ role: newRole })
         .eq("user_id", userId)
         .eq("project_id", projectId);
 
-      if (error) {
-        console.error(error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log("User role successfully updated.");
       setUsers((prev) =>
         prev.map((user) =>
           user.id === userId ? { ...user, role: newRole } : user
         )
       );
       setModalData(null);
-    } catch (error) {
-      console.error("Error updating user role:", error);
+    } catch (err) {
+      console.error("Error updating user role:", err);
       setError("No se pudo actualizar el rol del usuario.");
     }
   };
@@ -134,20 +126,16 @@ export default function UsersInProject({
   const deleteProject = async () => {
     if (!isUserAuthor) return;
 
-    const supabase = createClient();
     try {
+      const supabase = createClient();
       const { error } = await supabase
         .from("projects")
         .delete()
         .eq("id", projectId);
 
       if (error) throw error;
-
-      // Redirect or update UI after successful deletion
-      // For example, you could redirect to a projects list page:
-      // router.push('/projects');
-    } catch (error) {
-      console.error("Error deleting project:", error);
+    } catch (err) {
+      console.error("Error deleting project:", err);
       setError("No se pudo eliminar el proyecto.");
     }
   };
@@ -215,6 +203,15 @@ export default function UsersInProject({
               )}
             </div>
           ))}
+          {isUserAdmin && (
+            <Link
+              href={`/dashboard/add-member/${projectId}`}
+              className={styles.addMemberButton}
+            >
+              <span className={styles.addIcon}>+</span>
+              <span className={styles.addText}>Add Member</span>
+            </Link>
+          )}
         </div>
       )}
       {modalData && (

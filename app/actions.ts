@@ -416,7 +416,6 @@ export const createProject = async (
   isPublic: boolean,
   groupSelected: string | null
 ) => {
-  console.log(projectName, projectDescription, isPublic, groupSelected);
   if (!projectName || isPublic === undefined || isPublic === null) {
     throw new Error("Nombre del proyecto y tipo son requeridos");
   }
@@ -435,38 +434,72 @@ export const createProject = async (
     throw new Error("No se encontró el usuario");
   }
 
-  const { data: projectData, error: projectError } = await supabase
-    .from("projects")
-    .insert({
-      name: projectName,
-      description: projectDescription,
-      is_public: isPublic,
-      author_id: user.id,
-      group_id: groupSelected,
-    })
-    .select("id");
+  const { error: projectError } = await supabase.from("projects").insert({
+    name: projectName,
+    description: projectDescription,
+    is_public: isPublic,
+    author_id: user.id,
+    group_id: groupSelected,
+  });
 
   if (projectError) {
     console.log(projectError);
     throw new Error("Error al insertar el proyecto");
   }
+  const { data: projectIdData, error: selectError } = await supabase
+    .from("projects")
+    .select("id")
+    .eq("author_id", user.id)
+    .order("created_at", { ascending: false }) // Asegúrate de obtener el más reciente
+    .limit(1)
+    .single();
+  if (selectError) {
+    console.log("Group created but we couldnt find the id ");
+  }
 
-  const projectId = projectData?.[0]?.id;
+  const projectId = projectIdData?.id;
   if (!projectId) {
     throw new Error("Error generando Id de proyecto");
   }
+  const { error: insertErrorAuthor } = await supabase
+    .from("invitations")
+    .insert({
+      sender_id: user.id,
+      receiver_id: user.id,
+      group_id: groupSelected,
+      role: "admin",
+      project_id: projectId,
+      status: "pending",
+    });
 
-  const { error: projectMembersError } = await supabase
+  if (insertErrorAuthor) {
+    console.error(insertErrorAuthor);
+    throw new Error(`Error sending invitations to myself`);
+  }
+
+  const { error: insertAuthorAsMember } = await supabase
     .from("project_members")
     .insert({
-      project_id: projectId,
       user_id: user.id,
+      project_id: projectId,
       group_id: groupSelected,
       role: "admin",
     });
 
-  if (projectMembersError) {
-    throw new Error("Error insertando el miembro al proyecto");
+  if (insertAuthorAsMember) {
+    console.log(insertAuthorAsMember);
+    throw new Error("Error inserting author as member");
+  }
+
+  const { error: errorDeletingAuthorInvitation } = await supabase
+    .from("invitations")
+    .delete()
+    .eq("sender_id", user.id)
+    .eq("project_id", projectId);
+
+  if (errorDeletingAuthorInvitation) {
+    console.log(errorDeletingAuthorInvitation);
+    throw new Error("Error deleting author invitation");
   }
 
   if (groupSelected) {
@@ -477,25 +510,23 @@ export const createProject = async (
       .neq("user_id", user.id);
 
     if (otherMembersError) {
-      throw new Error("Error obteniendo al resto de los miembros");
+      throw new Error("Error obtaining other members");
     }
 
     const insertPromises = otherMembers.map(async (member) => {
       console.log(member.user_id, projectId, groupSelected, member.role);
-      const { error: insertError } = await supabase
-        .from("project_members")
-        .insert({
-          user_id: member.user_id,
-          project_id: projectId,
-          group_id: groupSelected,
-          role: member.role,
-        });
+      const { error: insertError } = await supabase.from("invitations").insert({
+        sender_id: user.id,
+        receiver_id: member.user_id,
+        group_id: groupSelected,
+        role: member.role,
+        project_id: projectId,
+        status: "pending",
+      });
 
       if (insertError) {
         console.error(insertError);
-        throw new Error(
-          `Error al agregar al resto de los usuarios al proyecto`
-        );
+        throw new Error(`Error sending invitations to other members`);
       }
     });
 
@@ -525,30 +556,24 @@ export const saveProjectInDatabase = async (
   projectId: string,
   newContent: JSON | SerializedEditorState
 ) => {
-  const supabase = await createClient();
-
-  // Obtener el contenido actual para evitar actualizaciones innecesarias
+  const supabase = await createClient(); // Obtener el contenido actual para evitar actualizaciones innecesarias
   const { data: existingData, error: fetchError } = await supabase
     .from("projects")
     .select("content")
     .eq("id", projectId)
     .single();
-
   if (fetchError) {
     console.error("Error al obtener contenido actual:", fetchError);
     return;
   }
-
   if (JSON.stringify(existingData.content) === JSON.stringify(newContent)) {
-    // No actualizar si el contenido es idéntico
+    console.log("contenido igual, no se guarda en db");
     return;
   }
-
   const { error: updateError } = await supabase
     .from("projects")
     .update({ content: newContent })
     .eq("id", projectId);
-
   if (updateError) {
     console.error("Error insertando nuevo contenido", updateError);
     return;
@@ -822,6 +847,7 @@ export async function verifyUserRole(
   projectId: string
 ) {
   const supabase = await createClient();
+
   const { data: userRole, error: userError } = await supabase
     .from("project_members")
     .select("role")

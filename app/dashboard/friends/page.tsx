@@ -19,6 +19,7 @@ export default function FriendsPanel() {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [email, setEmail] = useState("");
+  const [currentUserId, setCurrentUserId] = useState("");
 
   const fetchLinks = async () => {
     const supabase = await createClient();
@@ -32,6 +33,7 @@ export default function FriendsPanel() {
       setError("We could not verify your session. Please log in again.");
       return;
     }
+    setCurrentUserId(user.id);
 
     const { data, error } = await supabase
       .from("friends_links")
@@ -112,9 +114,9 @@ export default function FriendsPanel() {
         {myFriends.length > 0 ? (
           myFriends.map((friendLink) => {
             const friendUserId =
-              friendLink.linkFUserId !== friendLink.linkSUserId
-                ? friendLink.linkFUserId
-                : friendLink.linkSUserId;
+              friendLink.linkFUserId === currentUserId
+                ? friendLink.linkSUserId
+                : friendLink.linkFUserId;
 
             return (
               <UserDetails

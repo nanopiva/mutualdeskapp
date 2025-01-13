@@ -9,3 +9,125 @@
   flex-grow: 5;
   padding: 1rem;
 }
+.dashboard {
+  padding: 20px;
+  background-color: var(--white);
+  color: var(--black);
+}
+
+.title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: var(--strong-green);
+}
+
+.projectGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pageButton {
+  padding: 5px 10px;
+  margin: 0 5px;
+  border: 1px solid var(--gray);
+  background-color: var(--white);
+  color: var(--black);
+  cursor: pointer;
+}
+
+.activePage {
+  background-color: var(--strong-green);
+  color: var(--white);
+}
+
+.infoSection {
+  padding: 10px;
+  margin-top: 20px;
+}
+
+.infoTitle {
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--strong-green);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.infoCard {
+  background-color: var(--white);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.infoSubtitle {
+  font-size: 20px;
+  color: var(--strong-green);
+  margin-bottom: 10px;
+}
+
+.infoText {
+  color: var(--black);
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.infoLink {
+  display: inline-block;
+  background-color: var(--strong-green);
+  color: var(--white);
+  padding: 10px 15px;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.infoLink:hover {
+  background-color: #27ae60;
+}
+
+@media (max-width: 1200px) {
+  .projectGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .projectGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .projectGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .projectGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .infoSection {
+    padding: 15px;
+  }
+
+  .infoTitle {
+    font-size: 24px;
+  }
+
+  .infoSubtitle {
+    font-size: 18px;
+  }
+}
