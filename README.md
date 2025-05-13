@@ -1,96 +1,103 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+</head>
+<body>
+  <h1>MutualDesk</h1>
+  <p>
+    MutualDesk es un editor de texto en línea que permite a los usuarios trabajar en proyectos de forma colaborativa y en tiempo real. 
+    Ofrece funcionalidades como gestión de proyectos, creación de grupos, y conexión con amigos mediante un sistema de invitaciones.
+  </p>
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+  <h2>Características Principales</h2>
+  <ul>
+    <li><strong>Edición Colaborativa:</strong> Trabaja en proyectos simultáneamente con otros usuarios.</li>
+    <li><strong>Gestión de grupos:</strong> Permite a varias personas trabajar en diversos proyectos con acceso compartido.</li>
+    <li><strong>Gestión de amigos:</strong> Facilita la conexión con personas para colaboraciones recurrentes.</li>
+  </ul>
 
-## Features
+  <h2>Estructura de la Aplicación</h2>
+  <h3>Página Principal</h3>
+  <ul>
+    <li><strong>Proyectos Públicos:</strong> Lista de proyectos disponibles para todos los usuarios registrados.</li>
+    <li><strong>Resumen de Funcionalidades:</strong> Introducción a las capacidades de la aplicación.</li>
+  </ul>
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+  <h3>Páginas accesibles a través del Sidebar</h3>
+  <ul>
+    <li><strong>My Projects:</strong>
+      <ul>
+        <li>Proyectos en Grupo: Proyectos vinculados a grupos del usuario.</li>
+        <li>Proyectos Individuales: Proyectos propios del usuario, compartidos o no.</li>
+      </ul>
+    </li>
+    <li><strong>Groups:</strong>
+      <ul>
+        <li>Muestra los grupos del usuario.</li>
+        <li>Flecha extensible para:
+          <ul>
+            <li>Crear un nuevo grupo.</li>
+            <li>Acceder a la página de cada grupo.</li>
+          </ul>
+        </li>
+        <li><strong>Página del Grupo:</strong>
+          <ul>
+            <li>Añadir Miembros: Modal para agregar usuarios mediante email y rol.</li>
+            <li>Listado de Proyectos del Grupo.</li>
+            <li>Invitaciones Pendientes del Grupo.</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><strong>Friends:</strong> Lista de amigos del usuario.</li>
+    <li><strong>Invitations:</strong>
+      <ul>
+        <li>Invitaciones pendientes de amistad, grupo o proyecto.</li>
+        <li>Permite aceptarlas o rechazarlas.</li>
+      </ul>
+    </li>
+    <li><strong>Settings:</strong> Sección actualmente sin funcionalidad implementada.</li>
+    <li><strong>Logout:</strong> Botón para cerrar sesión en el dispositivo.</li>
+  </ul>
 
-## Demo
+  <h3>Header</h3>
+  <p>
+    Ícono de perfil en la esquina superior derecha que despliega un menú con la opción <strong>Profile</strong> para:
+  </p>
+  <ul>
+    <li>Cambiar foto de perfil.</li>
+    <li>Editar nombre, apellido y contraseña.</li>
+  </ul>
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+  <h2>Tecnologías Usadas</h2>
+  <ul>
+    <li><strong>Frontend:</strong> React.js con Next.js.</li>
+    <li><strong>Backend:</strong> Supabase para bases de datos y autenticación.</li>
+    <li><strong>Estilo:</strong> Diseñado con módulos de CSS, sin librerías externas como Tailwind.</li>
+    <li><strong>Realtime:</strong> Supabase channels.</li>
+  </ul>
 
-## Deploy to Vercel
+  <h2>Instalación</h2>
+  <ol>
+    <li>Clona este repositorio:
+      <pre><code>git clone https://github.com/nanopiva/mutualdeskapp</code></pre>
+    </li>
+    <li>Instala las dependencias:
+      <pre><code>npm install</code></pre>
+    </li>
+    <li>Configura las variables de entorno en un archivo <code>.env</code>.</li>
+    <li>Inicia el proyecto:
+      <pre><code>npm run dev</code></pre>
+    </li>
+  </ol>
 
-Vercel deployment will guide you through creating a Supabase account and project.
+  <h2>Contribución</h2>
+  <p>Si deseas contribuir, abre un <em>issue</em> o envía un <em>pull request</em> con tus mejoras.</p>
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
-
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
-
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
-
-## Clone and run locally
-
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
-
-2. Create a Next.js app using the Supabase Starter template npx command
-
-   ```bash
-   npx create-next-app -e with-supabase
-   ```
-
-3. Use `cd` to change into the app's directory
-
-   ```bash
-   cd name-of-new-app
-   ```
-
-4. Rename `.env.example` to `.env.local` and update the following:
-
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
-
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://app.supabase.com/project/_/settings/api)
-
-5. You can now run the Next.js local development server:
-
-   ```bash
-   npm run dev
-   ```
-
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
-
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
-
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
-
-## Feedback and issues
-
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
-
-## More Supabase examples
-
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+  <h2>Licencia</h2>
+  <p>Este proyecto está bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.</p>
+</body>
+</html>
