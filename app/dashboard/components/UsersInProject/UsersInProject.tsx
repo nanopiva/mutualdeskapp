@@ -46,6 +46,7 @@ export default function UsersInProject({
         if (usersError) {
           throw new Error("Error loading users of the project");
         }
+        console.log(projectMembers);
 
         const userPromises = projectMembers.map(async (member) => {
           const user = await getUserById(member.user_id);
@@ -83,8 +84,9 @@ export default function UsersInProject({
   };
 
   const removeUser = async (userId: string) => {
+    console.log("USER ID: ", userId);
     try {
-      const supabase = createClient();
+      const supabase = await createClient();
       const { error } = await supabase
         .from("project_members")
         .delete()
@@ -154,13 +156,16 @@ export default function UsersInProject({
 
   return (
     <div className={styles.wrapper}>
-      <button
-        className={styles.toggleButton}
-        onClick={() => setIsVisible((prev) => !prev)}
-        aria-expanded={isVisible}
-      >
-        {isVisible ? "▲ Hide users" : "▼ Show users"}
-      </button>
+      <div className={styles.buttonsContainer}>
+        <button
+          className={styles.toggleButton}
+          onClick={() => setIsVisible((prev) => !prev)}
+          aria-expanded={isVisible}
+        >
+          {isVisible ? "▲ Hide users" : "▼ Show users"}
+        </button>
+        {/* Conditionally render the "Add user to project" button */}
+      </div>
       {isVisible && (
         <div className={styles.usersContainer}>
           {users.map((user) => (

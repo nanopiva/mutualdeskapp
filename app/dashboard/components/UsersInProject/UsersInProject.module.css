@@ -272,3 +272,19 @@
   font-size: 16px;
   font-weight: bold;
 }
+
+.buttonsContainer {
+  display: flex;
+  justify-content: space-between;
+  margin: 1rem;
+}
+.addUserButton {
+  background-color: var(--strong-green);
+  color: var(--white);
+  padding: 1rem;
+  border-radius: 8px;
+}
+.addUserButton:hover {
+  background-color: var(--light-green);
+  transition: 0.5s all;
+}

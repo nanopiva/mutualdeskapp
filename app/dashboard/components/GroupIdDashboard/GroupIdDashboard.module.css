@@ -7,10 +7,16 @@
 }
 
 .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: clamp(20px, 5vw, 32px);
   border-bottom: 2px solid var(--input-border);
   padding-bottom: clamp(10px, 2vw, 16px);
-  text-align: center;
+}
+
+.headerContent {
+  flex: 1; /* Allow the content to take up remaining space */
 }
 
 .title {
@@ -126,4 +132,87 @@
   color: #000;
   text-decoration: none;
   cursor: pointer;
+}
+
+/* Header Actions (for the Leave Group button) */
+.headerActions {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+/* Leave Group Button */
+.leaveGroupButton {
+  background-color: #ff4d4f; /* Red color for the button */
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+  margin-left: 16px; /* Add some spacing between the content and the button */
+}
+
+.leaveGroupButton:hover {
+  background-color: #ff7875; /* Lighter red on hover */
+}
+
+/* Confirmation Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.confirmButton {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.confirmButton:hover {
+  background-color: #ff7875;
+}
+
+.cancelButton {
+  background-color: #f0f0f0;
+  color: #333;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancelButton:hover {
+  background-color: #ddd;
 }

@@ -25,6 +25,7 @@ export default async function GroupPage(props: { params: Params }) {
           .from("invitations")
           .select("sender_id, receiver_id, role, created_at")
           .eq("group_id", groupId)
+          .is("project_id", null)
           .eq("status", "pending"),
         supabase
           .from("projects")

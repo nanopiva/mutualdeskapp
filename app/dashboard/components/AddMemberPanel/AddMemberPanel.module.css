@@ -50,3 +50,20 @@
 .addMemberButton:hover {
   background-color: #45a049;
 }
+
+.message {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.success {
+  background-color: #d1fae5; /* Light green */
+  color: #065f46; /* Dark green */
+}
+
+.error {
+  background-color: #fee2e2; /* Light red */
+  color: #991b1b; /* Dark red */
+}

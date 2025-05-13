@@ -11,6 +11,7 @@ type Friend = {
   last_name: string;
   email: string;
 };
+
 interface AddMemberProps {
   projectId: string;
 }
@@ -25,11 +26,15 @@ export default function AddMemberToProject({ projectId }: AddMemberProps) {
   const [success, setSuccess] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [existingMembers, setExistingMembers] = useState<string[]>([]);
+  const [existingInvitations, setExistingInvitations] = useState<string[]>([]);
+  const [info, setInfo] = useState("");
 
   useEffect(() => {
     const initializeComponent = async () => {
-      console.log(projectId);
       await checkAdminStatus();
+      await fetchExistingMembers();
+      await fetchExistingInvitations();
       await fetchFriends();
       setIsLoading(false);
     };
@@ -43,10 +48,43 @@ export default function AddMemberToProject({ projectId }: AddMemberProps) {
       data: { user },
     } = await supabase.auth.getUser();
     if (user) {
-      console.log("Project desde AddMember:", projectId);
       const isUserAdmin = await verifyUserRole(user.id, projectId);
       setIsAdmin(isUserAdmin === "admin");
     }
+  };
+
+  const fetchExistingMembers = async () => {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("project_members")
+      .select("user_id")
+      .eq("project_id", projectId);
+
+    if (error) {
+      console.error("Error fetching existing members:", error);
+      setError("Failed to fetch existing project members.");
+      return;
+    }
+
+    const memberIds = data.map((member) => member.user_id);
+    setExistingMembers(memberIds);
+  };
+
+  const fetchExistingInvitations = async () => {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("invitations")
+      .select("receiver_id")
+      .eq("project_id", projectId);
+
+    if (error) {
+      console.error("Error fetching existing invitations:", error);
+      setError("Failed to fetch existing invitations.");
+      return;
+    }
+
+    const invitationIds = data.map((invitation) => invitation.receiver_id);
+    setExistingInvitations(invitationIds);
   };
 
   const fetchFriends = async () => {
@@ -57,22 +95,48 @@ export default function AddMemberToProject({ projectId }: AddMemberProps) {
 
     if (user) {
       try {
-        const { data, error } = await supabase
+        const { data: firstUserData, error: firstUserError } = await supabase
           .from("friends_links")
           .select("second_user_id")
           .eq("first_user_id", user.id);
 
-        if (error) throw error;
+        if (firstUserError) {
+          console.error(
+            "Error fetching friends_links (first_user_id):",
+            firstUserError
+          );
+          throw firstUserError;
+        }
 
-        const friendPromises = data.map(async (item) => {
-          const friendData = await getUserById(item.second_user_id);
+        const { data: secondUserData, error: secondUserError } = await supabase
+          .from("friends_links")
+          .select("first_user_id")
+          .eq("second_user_id", user.id);
+
+        if (secondUserError) {
+          console.error(
+            "Error fetching friends_links (second_user_id):",
+            secondUserError
+          );
+          throw secondUserError;
+        }
+
+        const allFriendIds = [
+          ...(firstUserData?.map((item) => item.second_user_id) || []),
+          ...(secondUserData?.map((item) => item.first_user_id) || []),
+        ];
+
+        const friendPromises = allFriendIds.map(async (friendId) => {
+          const friendData = await getUserById(friendId);
           return friendData as Friend;
         });
 
         const friendsData = await Promise.all(friendPromises);
-        setFriends(
-          friendsData.filter((friend): friend is Friend => friend !== null)
+        const validFriends = friendsData.filter(
+          (friend): friend is Friend => friend !== null
         );
+
+        setFriends(validFriends);
       } catch (error) {
         console.error("Error fetching friends:", error);
         setError("Failed to fetch friends. Please try again.");
@@ -84,6 +148,7 @@ export default function AddMemberToProject({ projectId }: AddMemberProps) {
     e.preventDefault();
     setError(null);
     setSuccess(false);
+    setInfo("");
 
     if (!isAdmin) {
       setError("You don't have permission to add members to this project.");
@@ -101,31 +166,148 @@ export default function AddMemberToProject({ projectId }: AddMemberProps) {
     }
 
     try {
-      // Invite friends
-      for (const friendId of selectedFriends) {
-        await supabase.from("invitations").insert({
-          sender_id: user.id,
-          receiver_id: friendId,
-          project_id: projectId,
-          role: role,
-        });
+      const emailToUserId: Record<string, string> = {};
+      let duplicateCount = 0;
+      const alreadyInvitedUsers: string[] = [];
+      const successfullyInvited: string[] = [];
+
+      // Map emails to user IDs
+      for (const email of inviteEmails) {
+        const { data: emailUser, error: emailError } = await supabase
+          .from("users")
+          .select("id, first_name, last_name")
+          .eq("email", email)
+          .single();
+
+        if (emailError || !emailUser) {
+          throw new Error(`No user found with email: ${email}`);
+        }
+
+        emailToUserId[email] = emailUser.id;
       }
 
-      // Invite by email
-      for (const email of inviteEmails) {
-        // Here you would typically send an email invitation
-        // For now, we'll just log it
-        console.log(
-          `Invitation sent to ${email} for project ${projectId} with role ${role}`
+      // Check all potential users for existing invitations
+      const allUserIdsToCheck = [
+        ...selectedFriends,
+        ...Object.values(emailToUserId),
+      ];
+
+      const { data: existingInvites } = await supabase
+        .from("invitations")
+        .select("receiver_id")
+        .in("receiver_id", allUserIdsToCheck)
+        .eq("project_id", projectId);
+
+      const existingInviteIds =
+        existingInvites?.map((inv) => inv.receiver_id) || [];
+
+      // Process selected friends
+      for (const friendId of selectedFriends) {
+        if (existingMembers.includes(friendId)) {
+          continue;
+        }
+
+        if (existingInviteIds.includes(friendId)) {
+          alreadyInvitedUsers.push(friendId);
+          continue;
+        }
+
+        const { error: friendError } = await supabase
+          .from("invitations")
+          .insert({
+            sender_id: user.id,
+            receiver_id: friendId,
+            project_id: projectId,
+            role: role,
+            status: "pending", // Still required by schema but ignored in logic
+          });
+
+        if (friendError) {
+          throw new Error(
+            `Error inviting user ${friendId}: ${friendError.message}`
+          );
+        }
+        successfullyInvited.push(friendId);
+      }
+
+      // Process email invites
+      for (const [email, userId] of Object.entries(emailToUserId)) {
+        if (selectedFriends.includes(userId)) {
+          duplicateCount++;
+          continue;
+        }
+        if (existingMembers.includes(userId)) continue;
+        if (existingInviteIds.includes(userId)) {
+          alreadyInvitedUsers.push(userId);
+          continue;
+        }
+
+        const { error: inviteError } = await supabase
+          .from("invitations")
+          .insert({
+            sender_id: user.id,
+            receiver_id: userId,
+            project_id: projectId,
+            role: role,
+            status: "pending", // Still required by schema but ignored in logic
+          });
+
+        if (inviteError) {
+          throw new Error(
+            `Error inviting by email (${userId}): ${inviteError.message}`
+          );
+        }
+        successfullyInvited.push(userId);
+      }
+
+      // Prepare info messages
+      let infoMessages: string[] = [];
+
+      if (successfullyInvited.length > 0) {
+        infoMessages.push("Invitations sent successfully!");
+      }
+
+      if (alreadyInvitedUsers.length > 0) {
+        // Get names of already invited users
+        const { data: usersData } = await supabase
+          .from("users")
+          .select("id, first_name, last_name")
+          .in("id", alreadyInvitedUsers);
+
+        const userNames =
+          usersData?.map((u) => `${u.first_name} ${u.last_name}`) || [];
+
+        infoMessages.push(
+          `These users already have pending invitations: ${userNames.join(", ")}`
         );
       }
 
-      setSuccess(true);
+      if (duplicateCount > 0) {
+        infoMessages.push(
+          `${duplicateCount} user(s) were in both friends list and email list - invited only once.`
+        );
+      }
+
+      setInfo(infoMessages.join("\n"));
+      setSuccess(successfullyInvited.length > 0);
       setSelectedFriends([]);
       setInviteEmails([]);
       setRole("viewer");
+
+      // Refresh existing invitations after successful submission
+      await fetchExistingInvitations();
+
+      setTimeout(() => {
+        setSuccess(false);
+        setInfo("");
+      }, 8000);
     } catch (error) {
-      setError("Failed to send invitations. Please try again.");
+      console.error("Error sending invitations:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to send invitations. Please try again."
+      );
     }
   };
 
@@ -159,34 +341,54 @@ export default function AddMemberToProject({ projectId }: AddMemberProps) {
   return (
     <div className={styles.addMemberContainer}>
       <h2 className={styles.title}>Add Members to Project</h2>
-      {error && <p className={styles.error}>{error}</p>}
+      {error && <p className={styles.error}>Error: {error}</p>}
       {success && (
         <p className={styles.success}>Invitations sent successfully!</p>
       )}
+      {info && <p className={styles.info}>{info}</p>}
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGroup}>
           <label className={styles.label}>Invite Friends</label>
           <div className={styles.friendsList}>
-            {friends.map((friend) => (
-              <div key={friend.id} className={styles.friendItem}>
-                <input
-                  type="checkbox"
-                  id={`friend-${friend.id}`}
-                  checked={selectedFriends.includes(friend.id)}
-                  onChange={() => handleFriendSelection(friend.id)}
-                  className={styles.friendCheckbox}
-                />
-                <label
-                  htmlFor={`friend-${friend.id}`}
-                  className={styles.friendLabel}
-                >
-                  <span className={styles.friendName}>
-                    {friend.first_name} {friend.last_name}
-                  </span>
-                  <span className={styles.friendEmail}>{friend.email}</span>
-                </label>
-              </div>
-            ))}
+            {friends.map((friend) => {
+              const isAlreadyMember = existingMembers.includes(friend.id);
+              const isAlreadyInvited = existingInvitations.includes(friend.id);
+              const isDisabled = isAlreadyMember || isAlreadyInvited;
+
+              return (
+                <div key={friend.id} className={styles.friendItem}>
+                  <input
+                    type="checkbox"
+                    id={`friend-${friend.id}`}
+                    checked={selectedFriends.includes(friend.id)}
+                    onChange={() =>
+                      !isDisabled && handleFriendSelection(friend.id)
+                    }
+                    className={styles.friendCheckbox}
+                    disabled={isDisabled}
+                  />
+                  <label
+                    htmlFor={`friend-${friend.id}`}
+                    className={styles.friendLabel}
+                  >
+                    <span className={styles.friendName}>
+                      {friend.first_name} {friend.last_name}
+                    </span>
+                    <span className={styles.friendEmail}>{friend.email}</span>
+                    {isAlreadyMember && (
+                      <span className={styles.alreadyMember}>
+                        (Already a member)
+                      </span>
+                    )}
+                    {isAlreadyInvited && !isAlreadyMember && (
+                      <span className={styles.alreadyInvited}>
+                        (Pending invitation)
+                      </span>
+                    )}
+                  </label>
+                </div>
+              );
+            })}
           </div>
         </div>
         <div className={styles.formGroup}>

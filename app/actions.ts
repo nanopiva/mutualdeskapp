@@ -75,7 +75,7 @@ export const signUpAction = async (formData: FormData) => {
 
   return encodedRedirect(
     "success",
-    "/sign-up?success=true",
+    "/sign-up",
     "Thanks for signing up! Please check your email for a verification link."
   );
 };
@@ -341,71 +341,90 @@ export const sendGroupInvitationForm = async (formData: FormData) => {
   const integrantRole = formData.get("role")?.toString();
   const group_id = formData.get("groupId")?.toString();
   const senderId = formData.get("senderId")?.toString();
+
+  console.log(formData);
+
   const supabase = await createClient();
 
-  //Validamos que el email no este vacío y los roles sean apropiados:
-  if (!integrantEmail || integrantEmail == "") {
-    throw new Error("El email del integrante es requerido");
+  // Validate that the email and role are provided and valid
+  if (!integrantEmail || integrantEmail === "") {
+    throw new Error("Integrant email is required.");
   }
-  console.log(integrantRole);
   if (
     !(
-      integrantRole == "author" ||
-      integrantRole == "editor" ||
-      integrantRole == "viewer"
+      integrantRole === "author" ||
+      integrantRole === "editor" ||
+      integrantRole === "viewer"
     )
   ) {
-    throw new Error("El rol del integrante no es valido");
+    throw new Error("Role of the integrant is not valid.");
   }
 
   try {
-    // 1. Buscar el usuario por email
-    const { data: users, error: userError } = await supabase
-      .from("users")
-      .select("id")
-      .eq("email", integrantEmail)
-      .single();
-
-    const receiver_id = users?.id;
-
-    if (userError || !users) {
-      throw new Error("Usuario no encontrado");
+    // 1. Find the user by email
+    const userId = await fetchUserIdByEmail(integrantEmail);
+    if (userId === null) {
+      console.log("Email not found.");
+      return { success: false, error: "Email not found." };
     }
 
-    // 2. Enviar invitacion al usuario
+    // 2. Check if an invitation already exists for this user to the same group
+    const { data: existingInvitation, error: invitationError } = await supabase
+      .from("invitations")
+      .select("id")
+      .eq("receiver_id", userId)
+      .eq("group_id", group_id)
+      .single();
 
-    console.log(
-      "Datos a enviar: ",
-      "SenderId:",
-      senderId,
-      "receiver_id",
-      receiver_id,
-      "group_id:",
-      group_id,
-      "role:",
-      integrantRole
-    );
+    if (existingInvitation) {
+      console.log(
+        "An invitation already exists for this user to the same group."
+      );
+      return {
+        success: false,
+        error: "An invitation already exists for this user to the same group.",
+      };
+    }
+
+    // 3. Check if the user is already a member of the group
+    const { data: existingMember, error: memberError } = await supabase
+      .from("group_members")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("group_id", group_id)
+      .single();
+
+    if (existingMember) {
+      console.log("The user is already a member of the group.");
+      return {
+        success: false,
+        error: "The user is already a member of the group.",
+      };
+    }
+
+    // 4. Send the invitation
     const { error: insertError } = await supabase.from("invitations").insert({
       sender_id: senderId,
-      receiver_id: receiver_id,
+      receiver_id: userId,
       group_id: group_id,
-
       status: "pending",
       role: integrantRole,
     });
+
     if (insertError) {
-      throw new Error("Error al enviar la invitacion");
+      console.log("Error inserting invitation: ", insertError);
+      return { success: false, error: "Error inserting invitation." };
     }
 
-    // 3. Revalidar la ruta para actualizar los datos
+    // 5. Revalidate the path to refresh the data
     revalidatePath(`/groups/${group_id}`);
 
     return { success: true };
   } catch (error) {
-    console.error("Error en sendGroupInvitation:", error);
+    console.error("Error in sendGroupInvitation:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Error desconocido",
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 };
@@ -414,10 +433,16 @@ export const createProject = async (
   projectName: string,
   projectDescription: string | null,
   isPublic: boolean,
-  groupSelected: string | null
+  groupSelected: string | null,
+  invitedMembers: string[]
 ) => {
-  if (!projectName || isPublic === undefined || isPublic === null) {
-    throw new Error("Nombre del proyecto y tipo son requeridos");
+  // Validaciones previas (mantenemos las mismas)
+  if (!projectName || projectName.length < 3 || projectName.length > 100) {
+    throw new Error("Project name must be between 3 and 100 characters.");
+  }
+
+  if (projectDescription && projectDescription.length > 500) {
+    throw new Error("Project description must be less than 500 characters.");
   }
 
   if (groupSelected === "") {
@@ -431,52 +456,30 @@ export const createProject = async (
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    throw new Error("No se encontró el usuario");
+    throw new Error("User not found. Please log in and try again.");
   }
 
-  const { error: projectError } = await supabase.from("projects").insert({
-    name: projectName,
-    description: projectDescription,
-    is_public: isPublic,
-    author_id: user.id,
-    group_id: groupSelected,
-  });
-
-  if (projectError) {
-    console.log(projectError);
-    throw new Error("Error al insertar el proyecto");
-  }
-  const { data: projectIdData, error: selectError } = await supabase
+  // Insertar el proyecto asegurando que author_id esté correctamente asignado
+  const { data: projectData, error: projectError } = await supabase
     .from("projects")
-    .select("id")
-    .eq("author_id", user.id)
-    .order("created_at", { ascending: false }) // Asegúrate de obtener el más reciente
-    .limit(1)
-    .single();
-  if (selectError) {
-    console.log("Group created but we couldnt find the id ");
-  }
-
-  const projectId = projectIdData?.id;
-  if (!projectId) {
-    throw new Error("Error generando Id de proyecto");
-  }
-  const { error: insertErrorAuthor } = await supabase
-    .from("invitations")
     .insert({
-      sender_id: user.id,
-      receiver_id: user.id,
+      name: projectName,
+      description: projectDescription,
+      is_public: isPublic,
+      author_id: user.id, // Asegurar que author_id está correctamente asignado
       group_id: groupSelected,
-      role: "admin",
-      project_id: projectId,
-      status: "pending",
-    });
+    })
+    .select("id, author_id") // Asegurarnos de obtener author_id en la respuesta
+    .single();
 
-  if (insertErrorAuthor) {
-    console.error(insertErrorAuthor);
-    throw new Error(`Error sending invitations to myself`);
+  if (projectError || !projectData) {
+    console.error("Error creating project:", projectError);
+    throw new Error("Failed to create the project. Please try again.");
   }
 
+  const projectId = projectData.id;
+
+  // Primero insertamos al autor como miembro (esto debería pasar la RLS ahora)
   const { error: insertAuthorAsMember } = await supabase
     .from("project_members")
     .insert({
@@ -487,54 +490,55 @@ export const createProject = async (
     });
 
   if (insertAuthorAsMember) {
-    console.log(insertAuthorAsMember);
-    throw new Error("Error inserting author as member");
+    console.error("Error inserting author as member:", insertAuthorAsMember);
+    throw new Error(
+      "Failed to add you as a project member. Please check RLS policies."
+    );
   }
 
-  const { error: errorDeletingAuthorInvitation } = await supabase
-    .from("invitations")
-    .delete()
-    .eq("sender_id", user.id)
-    .eq("project_id", projectId);
+  // Si hay grupo seleccionado y miembros invitados (excluyendo al autor si está en la lista)
+  if (groupSelected && invitedMembers.length > 0) {
+    const membersToInvite = invitedMembers.filter(
+      (memberId) => memberId !== user.id
+    );
 
-  if (errorDeletingAuthorInvitation) {
-    console.log(errorDeletingAuthorInvitation);
-    throw new Error("Error deleting author invitation");
-  }
+    if (membersToInvite.length > 0) {
+      const { data: rolesData, error: rolesError } = await supabase
+        .from("group_members")
+        .select("user_id, role")
+        .in("user_id", membersToInvite)
+        .eq("group_id", groupSelected);
 
-  if (groupSelected) {
-    const { data: otherMembers, error: otherMembersError } = await supabase
-      .from("group_members")
-      .select("user_id,role")
-      .eq("group_id", groupSelected)
-      .neq("user_id", user.id);
+      if (rolesError || !rolesData) {
+        console.error("Error fetching selected roles", rolesError);
+        throw new Error("Failed to fetch roles for selected members.");
+      }
 
-    if (otherMembersError) {
-      throw new Error("Error obtaining other members");
-    }
+      const insertPromises = rolesData.map(async (member) => {
+        const { error: insertError } = await supabase
+          .from("invitations")
+          .insert({
+            sender_id: user.id,
+            receiver_id: member.user_id,
+            group_id: groupSelected,
+            role: member.role,
+            project_id: projectId,
+            status: "pending",
+          });
 
-    const insertPromises = otherMembers.map(async (member) => {
-      console.log(member.user_id, projectId, groupSelected, member.role);
-      const { error: insertError } = await supabase.from("invitations").insert({
-        sender_id: user.id,
-        receiver_id: member.user_id,
-        group_id: groupSelected,
-        role: member.role,
-        project_id: projectId,
-        status: "pending",
+        if (insertError) {
+          console.error("Error sending invitation:", insertError);
+          throw new Error("Failed to send invitation.");
+        }
       });
 
-      if (insertError) {
-        console.error(insertError);
-        throw new Error(`Error sending invitations to other members`);
-      }
-    });
-
-    await Promise.all(insertPromises);
+      await Promise.all(insertPromises);
+    }
   }
 
   return { success: true, projectId };
 };
+
 export const getUserById = async (userId: string) => {
   const supabase = await createClient();
 
@@ -617,55 +621,32 @@ export const acceptInvitation = async (
 ) => {
   const supabase = await createClient();
   const userId = await getActualUserId();
-  if (groupId != null && projectId == null && role != null) {
-    try {
+
+  try {
+    if (groupId != null && projectId == null && role != null) {
       await supabase.from("group_members").insert({
         group_id: groupId,
         role: role,
         user_id: userId,
       });
-    } catch {
-      console.error("Error inserting group member");
-    }
-
-    try {
-      await supabase.from("invitations").delete().eq("id", invitationId);
-    } catch {
-      console.error("Error deleting group invitation");
-    }
-  }
-  if (groupId == null && projectId != null && role != null) {
-    try {
+    } else if (groupId == null && projectId != null && role != null) {
       await supabase.from("project_members").insert({
         project_id: projectId,
         user_id: userId,
         role: role,
       });
-    } catch {
-      console.error("Error inserting project member");
-    }
-
-    try {
-      await supabase.from("invitations").delete().eq("id", invitationId);
-    } catch {
-      console.error("Error deleting project invitation");
-    }
-  }
-  if (groupId == null && projectId == null && role == null) {
-    try {
+    } else if (groupId == null && projectId == null && role == null) {
       await supabase.from("friends_links").insert({
         first_user_id: invitationSenderId,
         second_user_id: userId,
       });
-    } catch {
-      console.error("Error inserting friend");
     }
 
-    try {
-      await supabase.from("invitations").delete().eq("id", invitationId);
-    } catch {
-      console.error("Error deleting friend request");
-    }
+    await supabase.from("invitations").delete().eq("id", invitationId);
+    return true; // Success
+  } catch (error) {
+    console.error("Error accepting invitation:", error);
+    return false; // Failure
   }
 };
 
@@ -674,8 +655,10 @@ export const declineInvitation = async (invitationId: string) => {
 
   try {
     await supabase.from("invitations").delete().eq("id", invitationId);
-  } catch {
-    console.error("Error deleting invitation");
+    return true; // Success
+  } catch (error) {
+    console.error("Error declining invitation:", error);
+    return false; // Failure
   }
 };
 
@@ -879,3 +862,118 @@ export async function verifyUserAuthor(
     return userRole.author_id;
   }
 }
+
+export const handleDeleteFriend = async (friendId: string) => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    console.error("Error getting authenticated user:", userError);
+    return false;
+  }
+
+  const { error } = await supabase
+    .from("friends_links")
+    .delete()
+    .or(
+      `and(first_user_id.eq.${user.id},second_user_id.eq.${friendId}),and(first_user_id.eq.${friendId},second_user_id.eq.${user.id})`
+    );
+
+  if (error) {
+    console.error("Error deleting friend:", error);
+    return false;
+  }
+
+  console.log("Friend deleted successfully");
+  return true;
+};
+
+export const leaveGroup = async (groupId: string) => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    console.error("Error getting authenticated user:", userError);
+    return false;
+  }
+
+  try {
+    // Delete the row from group_members where group_id and user_id match
+    const { error } = await supabase
+      .from("group_members")
+      .delete()
+      .eq("group_id", groupId)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Error leaving group:", error);
+      return false;
+    }
+
+    return true; // Success
+  } catch (error) {
+    console.error("Error leaving group:", error);
+    return false; // Failure
+  }
+};
+
+export const removeMember = async (groupId: string, userId: string) => {
+  console.log(groupId, userId);
+  const supabase = await createClient();
+
+  // Verify that the current user is an admin
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { success: false, error: "User not authenticated." };
+  }
+
+  const { data: currentUserRole, error: roleError } = await supabase
+    .from("group_members")
+    .select("role")
+    .eq("group_id", groupId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (roleError || currentUserRole?.role !== "admin") {
+    return {
+      success: false,
+      error: "You do not have permission to remove members.",
+    };
+  }
+
+  // Verify that the member to be removed is not an admin
+  const { data: targetUserRole, error: targetRoleError } = await supabase
+    .from("group_members")
+    .select("role")
+    .eq("group_id", groupId)
+    .eq("user_id", userId)
+    .single();
+
+  if (targetRoleError || targetUserRole?.role === "admin") {
+    return { success: false, error: "Cannot remove an admin." };
+  }
+
+  // Remove the member
+  const { error } = await supabase
+    .from("group_members")
+    .delete()
+    .eq("group_id", groupId)
+    .eq("user_id", userId);
+
+  if (error) {
+    console.log(error);
+    return { success: false, error: "Failed to remove the member." };
+  }
+
+  return { success: true };
+};

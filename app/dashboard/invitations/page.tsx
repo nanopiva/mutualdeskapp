@@ -113,6 +113,44 @@ export default function Invitations() {
     fetchInvitations();
   }, []);
 
+  const handleAcceptInvitation = async (
+    groupId: string | null,
+    projectId: string | null,
+    role: string | null,
+    invitationId: string,
+    invitationSenderId: string
+  ) => {
+    const result = await acceptInvitation(
+      groupId,
+      projectId,
+      role,
+      invitationId,
+      invitationSenderId
+    );
+
+    if (result) {
+      // Remove the accepted invitation from the UI
+      setInvitations((prevInvitations) =>
+        prevInvitations.filter((inv) => inv.invitationId !== invitationId)
+      );
+    } else {
+      setError("Failed to accept the invitation.");
+    }
+  };
+
+  const handleDeclineInvitation = async (invitationId: string) => {
+    const result = await declineInvitation(invitationId);
+
+    if (result) {
+      // Remove the declined invitation from the UI
+      setInvitations((prevInvitations) =>
+        prevInvitations.filter((inv) => inv.invitationId !== invitationId)
+      );
+    } else {
+      setError("Failed to decline the invitation.");
+    }
+  };
+
   if (error) {
     return <p>{error}</p>;
   }
@@ -150,7 +188,7 @@ export default function Invitations() {
                   <div className={styles.acceptDeclineButtons}>
                     <button
                       onClick={() =>
-                        acceptInvitation(
+                        handleAcceptInvitation(
                           invitation.invitationGroupId,
                           invitation.invitationProjectId,
                           invitation.invitationRole,
@@ -162,7 +200,9 @@ export default function Invitations() {
                       Accept
                     </button>
                     <button
-                      onClick={() => declineInvitation(invitation.invitationId)}
+                      onClick={() =>
+                        handleDeclineInvitation(invitation.invitationId)
+                      }
                     >
                       Decline
                     </button>
@@ -204,7 +244,7 @@ export default function Invitations() {
                   <div className={styles.acceptDeclineButtons}>
                     <button
                       onClick={() =>
-                        acceptInvitation(
+                        handleAcceptInvitation(
                           invitation.invitationGroupId,
                           invitation.invitationProjectId,
                           invitation.invitationRole,
@@ -216,7 +256,9 @@ export default function Invitations() {
                       Accept
                     </button>
                     <button
-                      onClick={() => declineInvitation(invitation.invitationId)}
+                      onClick={() =>
+                        handleDeclineInvitation(invitation.invitationId)
+                      }
                     >
                       Decline
                     </button>
@@ -239,6 +281,7 @@ export default function Invitations() {
             .filter((inv) => !inv.invitationGroupId && !inv.invitationProjectId)
             .map((invitation) => {
               const sender = userDetails[invitation.invitationSenderId];
+
               return (
                 <div
                   key={invitation.invitationId}
@@ -256,7 +299,7 @@ export default function Invitations() {
                   <div className={styles.acceptDeclineButtons}>
                     <button
                       onClick={() =>
-                        acceptInvitation(
+                        handleAcceptInvitation(
                           invitation.invitationGroupId,
                           invitation.invitationProjectId,
                           invitation.invitationRole,
@@ -268,7 +311,9 @@ export default function Invitations() {
                       Accept
                     </button>
                     <button
-                      onClick={() => declineInvitation(invitation.invitationId)}
+                      onClick={() =>
+                        handleDeclineInvitation(invitation.invitationId)
+                      }
                     >
                       Decline
                     </button>

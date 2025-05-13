@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import styles from "./GroupIdDashboard.module.css";
@@ -7,6 +6,8 @@ import ProfileCard from "../ProfileCard/MemberCard";
 import AddMemberPanel from "../AddMemberPanel/AddMemberPanel";
 import MemberInvitation from "../MemberInvitation/MemberInvitation";
 import ProjectCard from "../ProjectCard/ProjectCard";
+import { leaveGroup } from "@/app/actions";
+import { redirect } from "next/navigation";
 
 interface GroupData {
   id: string;
@@ -66,11 +67,37 @@ export default function GroupIdDashboard({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState<string>("");
+  const [currentUserId, setCurrentUserId] = useState<string>("");
 
   useEffect(() => {
     async function fetchUserDetails() {
       const supabase = createClient();
       try {
+        // Fetch current user details
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+
+        if (userError || !user) {
+          throw new Error("User not authenticated");
+        }
+
+        setCurrentUserId(user.id);
+
+        // Fetch current user's role in the group
+        const { data: currentUserRoleData, error: roleError } = await supabase
+          .from("group_members")
+          .select("role")
+          .eq("group_id", groupData.id)
+          .eq("user_id", user.id)
+          .single();
+
+        if (roleError) throw new Error(roleError.message);
+        setCurrentUserRole(currentUserRoleData?.role || "");
+
         // Fetch creator details
         const { data: creatorData, error: creatorError } = await supabase
           .from("users")
@@ -113,7 +140,13 @@ export default function GroupIdDashboard({
     }
 
     fetchUserDetails();
-  }, [groupData.creator_id, groupMembersData]);
+  }, [groupData.creator_id, groupMembersData, groupData.id]);
+
+  const handleRemoveMember = (userId: string) => {
+    setMembers((prevMembers) =>
+      prevMembers.filter((member) => member.user_id !== userId)
+    );
+  };
 
   const extractTextFromContent = (content: any): string => {
     if (!content?.root?.children) return "Empty project";
@@ -130,6 +163,16 @@ export default function GroupIdDashboard({
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  const handleLeaveGroup = async () => {
+    const success = await leaveGroup(groupData.id);
+
+    if (success) {
+      redirect("/groups");
+    } else {
+      setError("Failed to leave the group. Please try again.");
+    }
+  };
+
   if (loading) {
     return <div className={styles.loader}></div>;
   }
@@ -141,22 +184,56 @@ export default function GroupIdDashboard({
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>{groupData.name}</h1>
-        <p className={styles.description}>{groupData.description}</p>
-        <p className={styles.meta}>
-          Created on: {new Date(groupData.created_at).toLocaleDateString()}
-        </p>
-        <p className={styles.meta}>
-          Creator: {creator?.first_name} {creator?.last_name} ({creator?.email})
-        </p>
+        <div className={styles.headerContent}>
+          <h1 className={styles.title}>{groupData.name}</h1>
+          <p className={styles.description}>{groupData.description}</p>
+          <p className={styles.meta}>
+            Created on: {new Date(groupData.created_at).toLocaleDateString()}
+          </p>
+          <p className={styles.meta}>
+            Creator: {creator?.first_name} {creator?.last_name} (
+            {creator?.email})
+          </p>
+        </div>
+        <button
+          onClick={() => setIsLeaveModalOpen(true)}
+          className={styles.leaveGroupButton}
+        >
+          Leave Group
+        </button>
       </div>
+
+      {isLeaveModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h3>Are you sure you want to leave this group?</h3>
+            <p>This action cannot be undone.</p>
+            <div className={styles.modalActions}>
+              <button
+                onClick={handleLeaveGroup}
+                className={styles.confirmButton}
+              >
+                Yes, Leave Group
+              </button>
+              <button
+                onClick={() => setIsLeaveModalOpen(false)}
+                className={styles.cancelButton}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Group Members</h2>
-          <button onClick={openModal} className={styles.addMemberButton}>
-            Add Member
-          </button>
+          {currentUserRole === "admin" && (
+            <button onClick={openModal} className={styles.addMemberButton}>
+              Add Member
+            </button>
+          )}
         </div>
         {members.length > 0 ? (
           <div className={styles.memberList}>
@@ -169,6 +246,11 @@ export default function GroupIdDashboard({
                 role={member.role}
                 profilePicture={`https://kckpcncvhqcxfvzinkto.supabase.co/storage/v1/object/public/profilepictures/${member?.user_id}/profile.jpg`}
                 created_at={member.created_at}
+                userId={member.user_id}
+                groupId={groupData.id}
+                currentUserRole={currentUserRole}
+                currentUserId={currentUserId}
+                onRemoveMember={handleRemoveMember}
               />
             ))}
           </div>

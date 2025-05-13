@@ -119,15 +119,17 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
         />
         <span className={styles.itemSidebarTitle}>Invitations</span>
       </Link>
-      <Link href="/dashboard/settings" className={styles.itemSidebarContainer}>
-        <Image
-          src={settingsLogo}
-          alt="Logo of Settings"
-          width={35}
-          height={35}
-        />
-        <span className={styles.itemSidebarTitle}>Settings</span>
-      </Link>
+      {/*
+        <Link href="/dashboard/settings" className={styles.itemSidebarContainer}>
+          <Image
+            src={settingsLogo}
+            alt="Logo of Settings"
+            width={35}
+            height={35}
+          />
+          <span className={styles.itemSidebarTitle}>Settings</span>
+        </Link>
+      */}
       <button
         className={styles.itemSidebarContainer}
         id={styles.logoutItem}
