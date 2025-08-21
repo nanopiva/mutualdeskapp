@@ -1,13 +1,37 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { Suspense, useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import styles from "./page.module.css";
 
+// Wrapper que satisface el requisito de Suspense
 export default function NewProjectPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className={styles.container}>
+          <div className={styles.header}>
+            <h1 className={styles.title}>Create New Project</h1>
+          </div>
+          <div className={styles.loaderContainer}>
+            <div className="loader" />
+          </div>
+        </div>
+      }
+    >
+      <NewProjectForm />
+    </Suspense>
+  );
+}
+
+// Todo lo que usa useSearchParams vive adentro del Suspense
+function NewProjectForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const supabase = useMemo(() => createClient(), []);
+
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
   const [isPublic, setIsPublic] = useState(false);
@@ -19,20 +43,9 @@ export default function NewProjectPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const supabase = createClient();
-
   const urlGroupId = searchParams.get("groupId");
 
-  useEffect(() => {
-    if (urlGroupId) {
-      setGroupOption("group");
-      fetchGroups().then(() => {
-        setSelectedGroup(urlGroupId);
-      });
-    }
-  }, [urlGroupId]);
-
-  const fetchGroups = async () => {
+  const fetchGroups = useCallback(async () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -48,8 +61,17 @@ export default function NewProjectPage() {
       return;
     }
 
-    setAvailableGroups(data.map((item) => item.groups));
-  };
+    setAvailableGroups((data || []).map((item: any) => item.groups));
+  }, [supabase]);
+
+  useEffect(() => {
+    if (urlGroupId) {
+      setGroupOption("group");
+      fetchGroups().then(() => {
+        setSelectedGroup(urlGroupId);
+      });
+    }
+  }, [urlGroupId, fetchGroups]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,14 +115,15 @@ export default function NewProjectPage() {
 
         if (groupError) throw groupError;
 
-        const membersToInsert = groupMembers
-          .filter((member) => member.user_id !== user.id)
-          .map((member) => ({
-            project_id: createdProject.id,
-            user_id: member.user_id,
-            group_id: selectedGroup,
-            role: "member",
-          }));
+        const membersToInsert =
+          (groupMembers || [])
+            .filter((m) => m.user_id !== user.id)
+            .map((m) => ({
+              project_id: createdProject.id,
+              user_id: m.user_id,
+              group_id: selectedGroup,
+              role: "member",
+            })) ?? [];
 
         membersToInsert.push({
           project_id: createdProject.id,

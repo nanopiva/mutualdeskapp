@@ -1,23 +1,32 @@
 import { resetPasswordAction } from "@/app/actions/auth/reset-password";
 import { createClient } from "@/utils/supabase/server";
-import { FormMessage } from "@/app/components/FormMessage/form-message";
+import {
+  FormMessage,
+  type Message,
+} from "@/app/components/FormMessage/form-message";
 import Link from "next/link";
 import styles from "./page.module.css";
+
+type SP = Record<string, string | string[] | undefined>;
 
 export default async function ResetPasswordPage({
   searchParams,
 }: {
-  searchParams: {
-    token?: string;
-    error?: string;
-    success?: string;
-    message?: string;
-  };
+  searchParams?: Promise<SP>;
 }) {
-  const token = searchParams.token;
+  const raw: SP = (await searchParams) ?? {};
+
+  const pick = (v: string | string[] | undefined) =>
+    Array.isArray(v) ? v[0] : v;
+
+  const token = pick(raw.token);
+  const spError = pick(raw.error);
+  const spSuccess = pick(raw.success);
+  const spMessage = pick(raw.message);
+
   let tokenValid = false;
-  let error = searchParams.error || "";
-  let message = searchParams.message || "";
+  let errorText = spError || "";
+  let infoText = spMessage || "";
 
   if (token) {
     const supabase = await createClient();
@@ -27,10 +36,19 @@ export default async function ResetPasswordPage({
         type: "recovery",
       });
       tokenValid = !verifyError;
-    } catch (err) {
-      error = "Invalid or expired token";
+      if (verifyError && !errorText) {
+        errorText = "Invalid or expired token";
+      }
+    } catch {
+      tokenValid = false;
+      if (!errorText) errorText = "Invalid or expired token";
     }
   }
+
+  let msg: Message | null = null;
+  if (errorText) msg = { error: errorText };
+  else if (spSuccess) msg = { success: spSuccess };
+  else if (infoText) msg = { message: infoText };
 
   return (
     <main className={styles.main} role="main">
@@ -44,13 +62,7 @@ export default async function ResetPasswordPage({
               : "No token provided"}
         </p>
 
-        <FormMessage
-          message={{
-            error: error || undefined,
-            success: searchParams.success || undefined,
-            message: message,
-          }}
-        />
+        {msg ? <FormMessage message={msg} /> : null}
 
         {token && tokenValid ? (
           <form className={styles.form} action={resetPasswordAction}>

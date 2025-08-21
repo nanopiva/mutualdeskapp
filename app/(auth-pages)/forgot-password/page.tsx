@@ -1,17 +1,33 @@
 import { forgotPasswordAction } from "@/app/actions/auth/forgot-password";
 import {
   FormMessage,
-  Message,
+  type Message,
 } from "@/app/components/FormMessage/form-message";
 import Link from "next/link";
 import styles from "./page.module.css";
 
+type SP = Record<string, string | string[] | undefined>;
+
 export default async function ForgotPassword({
   searchParams,
 }: {
-  searchParams: Message;
+  searchParams?: Promise<SP>;
 }) {
-  const isSuccess = "success" in searchParams;
+  const raw: SP = (await searchParams) ?? {};
+
+  const pick = (v: string | string[] | undefined) =>
+    Array.isArray(v) ? v[0] : v;
+
+  const success = pick(raw.success);
+  const error = pick(raw.error);
+  const info = pick(raw.message);
+
+  let msg: Message | null = null;
+  if (success) msg = { success };
+  else if (error) msg = { error };
+  else if (info) msg = { message: info };
+
+  const isSuccess = Boolean(success);
 
   return (
     <main className={styles.main} role="main">
@@ -25,7 +41,7 @@ export default async function ForgotPassword({
             : "Enter your email to receive a password reset link"}
         </p>
 
-        <FormMessage message={searchParams} />
+        {msg ? <FormMessage message={msg} /> : null}
 
         {!isSuccess && (
           <form className={styles.form}>

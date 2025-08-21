@@ -4,22 +4,37 @@ import { Navbar } from "../../components/Editor/Navbar";
 import { Room } from "./room";
 import fetchProject from "@/app/actions/project/fetchProject";
 import { createClient } from "@/utils/supabase/server";
+import { notFound } from "next/navigation";
 
-interface ProjectIdProps {
-  params: { projectId: string };
-}
+type Params = { projectId?: string };
 
-const ProjectPage = async ({ params }: ProjectIdProps) => {
-  const { projectId } = await params;
+export default async function ProjectPage({
+  params,
+}: {
+  params?: Promise<Params>;
+}) {
+  const p = (await params) ?? {};
+  const projectId = typeof p.projectId === "string" ? p.projectId : undefined;
+
+  if (!projectId) {
+    notFound();
+  }
 
   const project = await fetchProject(projectId);
+  if (!project) {
+    notFound();
+  }
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthor = user?.id === project?.author_id;
+  const isAuthor = !!(
+    user?.id &&
+    project?.author_id &&
+    user.id === project.author_id
+  );
 
   return (
     <Room>
@@ -45,6 +60,4 @@ const ProjectPage = async ({ params }: ProjectIdProps) => {
       </div>
     </Room>
   );
-};
-
-export default ProjectPage;
+}

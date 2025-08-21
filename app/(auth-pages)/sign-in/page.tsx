@@ -1,16 +1,31 @@
 import { signInAction } from "@/app/actions/auth/sign-in";
 import {
   FormMessage,
-  Message,
+  type Message,
 } from "@/app/components/FormMessage/form-message";
 import Link from "next/link";
 import styles from "./page.module.css";
 
+type SP = Record<string, string | string[] | undefined>;
+
 export default async function Login({
   searchParams,
 }: {
-  searchParams: Message;
+  searchParams?: Promise<SP>;
 }) {
+  const raw: SP = (await searchParams) ?? {};
+  const pick = (v: string | string[] | undefined) =>
+    Array.isArray(v) ? v[0] : v;
+
+  const spSuccess = pick(raw.success);
+  const spError = pick(raw.error);
+  const spMessage = pick(raw.message);
+
+  let msg: Message | null = null;
+  if (spError) msg = { error: spError };
+  else if (spSuccess) msg = { success: spSuccess };
+  else if (spMessage) msg = { message: spMessage };
+
   return (
     <main className={styles.main} role="main">
       <section className={styles.card}>
@@ -64,7 +79,7 @@ export default async function Login({
             />
           </div>
 
-          <FormMessage message={searchParams} />
+          {msg ? <FormMessage message={msg} /> : null}
 
           <button
             type="submit"

@@ -1,16 +1,32 @@
 import { signUpAction } from "@/app/actions/auth/sign-up";
 import {
   FormMessage,
-  Message,
+  type Message,
 } from "@/app/components/FormMessage/form-message";
 import Link from "next/link";
 import styles from "./page.module.css";
 
-export default async function SignUp(props: {
-  searchParams: Promise<Message>;
+type SP = Record<string, string | string[] | undefined>;
+
+export default async function SignUp({
+  searchParams,
+}: {
+  searchParams?: Promise<SP>;
 }) {
-  const searchParams = await props.searchParams;
-  const isSuccess = "success" in searchParams && Boolean(searchParams.success);
+  const raw: SP = (await searchParams) ?? {};
+  const pick = (v: string | string[] | undefined) =>
+    Array.isArray(v) ? v[0] : v;
+
+  const spSuccess = pick(raw.success);
+  const spError = pick(raw.error);
+  const spMessage = pick(raw.message);
+
+  let msg: Message | null = null;
+  if (spError) msg = { error: spError };
+  else if (spSuccess) msg = { success: spSuccess };
+  else if (spMessage) msg = { message: spMessage };
+
+  const isSuccess = Boolean(spSuccess);
 
   return (
     <main className={styles.main} role="main">
@@ -18,7 +34,7 @@ export default async function SignUp(props: {
         <h1 className={styles.title}>Create Account</h1>
         <p className={styles.subtitle}>Join us to get started</p>
 
-        <FormMessage message={searchParams} />
+        {msg ? <FormMessage message={msg} /> : null}
 
         {!isSuccess && (
           <form className={styles.form} action={signUpAction}>
