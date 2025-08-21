@@ -1,6 +1,5 @@
 import styles from "./mainfront.module.css";
-import Image from "next/image";
-import mainImage from "../../../public/frontImage.jpg";
+import mainImage from "../../../public/frontImage.png";
 import Link from "next/link";
 
 export default function Mainfront() {
@@ -35,10 +34,10 @@ export default function Mainfront() {
         </div>
       </div>
       <div className={styles.mainfrontImageContainer}>
-        <Image
+        <img
           className={styles.mainfrontImage}
-          src={mainImage}
-          alt="Ilustrative picture"
+          src={mainImage.src}
+          alt="Illustrative picture of team collaboration"
         />
       </div>
     </div>

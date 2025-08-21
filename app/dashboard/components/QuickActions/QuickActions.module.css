@@ -1,0 +1,120 @@
+.quickActions {
+  margin-bottom: 2.5rem;
+  background-color: var(--white);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.title {
+  color: var(--strong-green);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.actionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.actionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1.5rem;
+  background-color: var(--white);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.actionCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--icon-color);
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+.actionCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.actionCard:hover::before {
+  transform: scaleX(1);
+}
+
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--bg-color);
+  color: var(--icon-color);
+  margin-bottom: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.actionCard:hover .iconContainer {
+  transform: scale(1.05);
+}
+
+.textContainer {
+  flex: 1;
+}
+
+.actionTitle {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.125rem;
+  color: var(--black);
+  font-weight: 600;
+}
+
+.actionDescription {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--gray);
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .actionsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quickActions {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .actionsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actionCard {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+  }
+
+  .iconContainer {
+    margin-bottom: 0;
+    flex: 0 0 56px;
+  }
+}

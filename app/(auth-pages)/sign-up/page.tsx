@@ -1,4 +1,4 @@
-import { signUpAction } from "@/app/actions";
+import { signUpAction } from "@/app/actions/auth/sign-up";
 import {
   FormMessage,
   Message,
@@ -13,92 +13,115 @@ export default async function SignUp(props: {
   const isSuccess = "success" in searchParams && Boolean(searchParams.success);
 
   return (
-    <div className={styles.backgroundContainer}>
-      <main className={styles.main}>
-        <form className={styles.form}>
-          <h1 className={styles.title}>Sign up</h1>
+    <main className={styles.main} role="main">
+      <section className={styles.card}>
+        <h1 className={styles.title}>Create Account</h1>
+        <p className={styles.subtitle}>Join us to get started</p>
 
-          <p className={styles.register}>
-            Already have an account?{" "}
-            <Link className={styles.registerLink} href="/sign-in">
-              Sign in
-            </Link>
-          </p>
+        <FormMessage message={searchParams} />
 
-          {/* Muestra el mensaje de éxito o el formulario */}
-          <FormMessage message={searchParams} />
+        {!isSuccess && (
+          <form className={styles.form} action={signUpAction}>
+            <div className={styles.nameFields}>
+              <div className={styles.formGroup}>
+                <label htmlFor="firstName" className={styles.label}>
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  placeholder="John"
+                  className={styles.input}
+                  required
+                  minLength={2}
+                  autoComplete="given-name"
+                  aria-required="true"
+                />
+              </div>
 
-          {!isSuccess && (
-            <>
-              <label htmlFor="firstName" className={styles.label}>
-                First Name
-              </label>
-              <input
-                name="firstName"
-                id="firstName"
-                placeholder="John"
-                required
-                className={styles.input}
-                aria-label="First name"
-              />
+              <div className={styles.formGroup}>
+                <label htmlFor="lastName" className={styles.label}>
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  placeholder="Doe"
+                  className={styles.input}
+                  required
+                  minLength={2}
+                  autoComplete="family-name"
+                  aria-required="true"
+                />
+              </div>
+            </div>
 
-              <label htmlFor="lastName" className={styles.label}>
-                Last Name
-              </label>
-              <input
-                name="lastName"
-                id="lastName"
-                placeholder="Doe"
-                required
-                className={styles.input}
-                aria-label="Last name"
-              />
-
+            <div className={styles.formGroup}>
               <label htmlFor="email" className={styles.label}>
                 Email
               </label>
               <input
-                name="email"
+                type="email"
                 id="email"
+                name="email"
                 placeholder="you@example.com"
-                required
                 className={styles.input}
+                required
                 autoComplete="email"
-                aria-label="Email address"
+                aria-required="true"
+                aria-describedby="email-help"
               />
+              <small id="email-help" className={styles.helpText}>
+                We'll never share your email
+              </small>
+            </div>
 
-              <div className={styles.passwordRequirements}>
-                <h2>Password Requirements</h2>
-                <ul>
-                  <li>At least 8 characters</li>
-                  <li>At least one uppercase letter</li>
-                  <li>At least one lowercase letter</li>
-                  <li>At least one number</li>
-                  <li>At least one special character (!@#$%^&*)</li>
-                </ul>
-              </div>
-
+            <div className={styles.formGroup}>
               <label htmlFor="password" className={styles.label}>
                 Password
               </label>
               <input
-                className={styles.input}
                 type="password"
-                name="password"
                 id="password"
-                placeholder="Your password"
+                name="password"
+                placeholder="••••••••"
+                className={styles.input}
                 required
+                minLength={8}
                 autoComplete="new-password"
-                aria-label="Password"
+                aria-required="true"
               />
+              <div className={styles.passwordRequirements}>
+                <p className={styles.requirementsTitle}>
+                  Password Requirements:
+                </p>
+                <ul className={styles.requirementsList}>
+                  <li>At least 8 characters</li>
+                  <li>One uppercase letter</li>
+                  <li>One lowercase letter</li>
+                  <li>One number</li>
+                  <li>One special character (!@#$%^&*)</li>
+                </ul>
+              </div>
+            </div>
 
-              <button className={styles.button} formAction={signUpAction}>
-                Sign up
-              </button>
-            </>
-          )}
-        </form>
-      </main>
-    </div>
+            <button type="submit" className={styles.button}>
+              Sign Up
+            </button>
+          </form>
+        )}
+
+        <div className={styles.footer}>
+          <p className={styles.loginPrompt}>
+            Already have an account?{" "}
+            <Link href="/sign-in" className={styles.loginLink}>
+              Sign in
+            </Link>
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }

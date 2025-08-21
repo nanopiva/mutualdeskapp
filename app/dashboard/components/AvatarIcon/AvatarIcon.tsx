@@ -20,10 +20,12 @@ const AvatarIcon: React.FC<AvatarIconProps> = ({
     style={{ width: `${size}px`, height: `${size}px` }}
   >
     <Avatar.Image
+      key={pictureURL} // 🔹 fuerza re-render cuando cambia la URL
       className={styles.Image}
       src={pictureURL}
       alt="Profile picture"
     />
+
     <Avatar.Fallback
       className={styles.Fallback}
       delayMs={600}

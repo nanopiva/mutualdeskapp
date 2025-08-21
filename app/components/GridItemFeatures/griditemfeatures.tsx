@@ -1,33 +1,31 @@
-import Image, { ImageProps } from "next/image";
 import styles from "./griditemfeatures.module.css";
-import { StaticImport } from "next/dist/shared/lib/get-img-props";
+import { ReactNode } from "react";
 
 interface GridItemFeaturesProps {
-  image: StaticImport;
-  alt: string;
+  icon: ReactNode;
   title: string;
   description: string;
-  imageSize?: number;
+  comingSoon?: boolean;
 }
 
 export default function GridItemFeatures({
-  image,
-  alt,
+  icon,
   title,
   description,
-  imageSize = 150,
+  comingSoon = false,
 }: GridItemFeaturesProps) {
   return (
-    <div className={styles.featuresNowGridItem}>
-      <Image
-        className={styles.featuresNowGridItemImage}
-        src={image}
-        alt={alt}
-        width={imageSize}
-        height={imageSize}
-      />
-      <span className={styles.featuresNowGridItemTitle}>{title}</span>
-      <p className={styles.featuresNowGridItemDescription}>{description}</p>
+    <div
+      className={`${styles.gridItem} ${comingSoon ? styles.comingSoon : ""}`}
+    >
+      <div className={styles.iconContainer}>
+        {icon}
+        {comingSoon && (
+          <span className={styles.comingSoonBadge}>Coming Soon</span>
+        )}
+      </div>
+      <h3 className={styles.gridItemTitle}>{title}</h3>
+      <p className={styles.gridItemDescription}>{description}</p>
     </div>
   );
 }

@@ -1,13 +1,11 @@
-/* Ensure the container takes up the full height and width */
 .sidebarAndMainContainer {
   display: flex;
   width: 100%;
-  min-height: calc(100vh - 60px); /* Adjust based on header height */
+  min-height: calc(100vh - 60px);
 }
 
-/* Sidebar should have a fixed width and not shrink */
 .sidebarContainer {
-  flex: 0 0 220px; /* Fixed width for the sidebar */
+  flex: 0 0 220px;
   background-color: #f2f9f2;
   box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
   border-right: 1px solid rgba(0, 0, 0, 0.1);
@@ -16,25 +14,33 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 1rem;
-  overflow-y: auto; /* Allow scrolling if content overflows */
+  overflow-y: auto;
 }
 
-/* Main content should take up the remaining space */
 .mainContentContainer {
-  flex: 1; /* Take up remaining space */
+  flex: 1;
   padding: 1rem;
-  overflow-y: auto; /* Allow scrolling if content overflows */
+  overflow-y: auto;
 }
 
-/* Dashboard-specific styles */
+.editorLayout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.editorContent {
+  flex: 1;
+  overflow: auto;
+}
+
 .dashboard {
   padding: 20px;
   background-color: var(--white);
   color: var(--black);
-  width: 100%; /* Ensure it takes up full width */
+  width: 100%;
 }
 
-/* Ensure the project grid and other content don't overflow */
 .projectGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -42,7 +48,6 @@
   margin-bottom: 20px;
 }
 
-/* Pagination and other elements */
 .pagination {
   display: flex;
   justify-content: center;
@@ -56,6 +61,13 @@
   background-color: var(--white);
   color: var(--black);
   cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.pageButton:hover {
+  background-color: var(--light-green);
+  color: var(--white);
 }
 
 .activePage {
@@ -63,7 +75,6 @@
   color: var(--white);
 }
 
-/* Info section styles */
 .infoSection {
   padding: 10px;
   margin-top: 20px;
@@ -83,6 +94,11 @@
   padding: 20px;
   margin-bottom: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.infoCard:hover {
+  transform: translateY(-2px);
 }
 
 .infoSubtitle {
@@ -108,10 +124,16 @@
 }
 
 .infoLink:hover {
-  background-color: #27ae60;
+  background-color: var(--light-green);
 }
 
-/* Responsive adjustments */
+.loaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+}
+
 @media (max-width: 1200px) {
   .projectGrid {
     grid-template-columns: repeat(4, 1fr);
@@ -145,5 +167,9 @@
 @media (max-width: 576px) {
   .projectGrid {
     grid-template-columns: 1fr;
+  }
+
+  .sidebarContainer {
+    flex: 0 0 180px;
   }
 }

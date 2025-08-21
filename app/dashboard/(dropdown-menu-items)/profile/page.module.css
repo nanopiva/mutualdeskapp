@@ -2,7 +2,7 @@
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 1.5rem;
   background-color: var(--white);
   border-radius: 8px;
 }
@@ -11,64 +11,102 @@
   font-size: 1.8rem;
   font-weight: 600;
   color: var(--black);
-  margin-bottom: 15px;
+  margin-bottom: 1.5rem;
   text-align: center;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 1.25rem;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .label {
   font-size: 0.9rem;
-  color: var(--dark-gray);
+  color: var(--gray);
+  font-weight: 500;
 }
 
 .input {
-  padding: 10px;
+  padding: 0.75rem;
   font-size: 1rem;
-  border: 1px solid var(--gray);
+  border: 1px solid var(--input-border);
   border-radius: 6px;
   width: 100%;
+  transition: all 0.2s ease;
+  background: var(--white);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--strong-green);
+  box-shadow: 0 0 0 2px rgba(36, 130, 50, 0.1);
 }
 
 .emailDisplay {
-  padding: 10px;
+  padding: 0.75rem;
   font-size: 1rem;
-  background-color: var(--light-gray);
+  background-color: #f8f9fa;
+  border: 1px solid var(--input-border);
   border-radius: 6px;
-  color: var(--dark-gray);
+  color: var(--gray);
 }
 
 .submitButton {
-  padding: 12px 20px;
+  padding: 0.75rem 1.5rem;
   background-color: var(--strong-green);
   color: var(--white);
-  font-weight: 600;
+  font-weight: 500;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   text-align: center;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.submitButton:hover {
+.submitButton:hover:not(:disabled) {
   background-color: var(--light-green);
 }
 
-/* Avatar styling */
+.submitButton:disabled {
+  background-color: var(--gray);
+  cursor: not-allowed;
+}
+
+.changePasswordButton {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  margin-top: 1rem;
+  background-color: transparent;
+  color: var(--strong-green);
+  font-weight: 500;
+  border: 1px solid var(--strong-green);
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.changePasswordButton:hover {
+  background-color: var(--strong-green);
+  color: var(--white);
+}
+
 .formGroupAvatar {
   position: relative;
   display: flex;
   justify-content: center;
+  margin-bottom: 1.5rem;
 }
 
 .avatarLabel {
@@ -83,6 +121,12 @@
   padding: 0;
   display: inline-block;
   position: relative;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.avatarButton:hover {
+  transform: scale(1.02);
 }
 
 .avatarOverlay {
@@ -91,13 +135,14 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* Gris translúcido */
+  background: rgba(45, 58, 58, 0.7);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   opacity: 0;
   transition: opacity 0.3s ease;
-  border-radius: 50%; /* Aseguramos que el contenedor del overlay tenga bordes redondeados */
+  border-radius: 50%;
 }
 
 .avatarButton:hover .avatarOverlay {
@@ -106,16 +151,35 @@
 
 .editMessage,
 .editIcon {
-  color: white;
-  font-size: 14px;
+  color: var(--white);
+  font-size: 0.8rem;
   text-align: center;
 }
 
 .editMessage {
   display: block;
-  margin-bottom: 5px; /* Separar el mensaje del ícono */
+  margin-bottom: 0.25rem;
+  font-weight: 500;
 }
 
-.uploadProfilePictureInput {
-  display: none; /* Oculta el input de archivo */
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+}
+
+@media (max-width: 768px) {
+  .profilePage {
+    padding: 1.25rem;
+    margin: 0 0.5rem;
+  }
+
+  .pageTitle {
+    font-size: 1.5rem;
+  }
+
+  .form {
+    gap: 1rem;
+  }
 }

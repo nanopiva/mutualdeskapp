@@ -1,43 +1,82 @@
-.createGroupContainer {
-  max-width: 550px;
+.container {
+  max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.header {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .title {
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 1.5rem;
-  text-align: center;
+  font-size: 1.75rem;
+  color: var(--black);
+  margin: 0;
+}
+
+.backLink {
+  color: var(--strong-green);
+  text-decoration: none;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--strong-green);
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.backLink:hover {
+  background-color: rgba(36, 130, 50, 0.1);
+  text-decoration: none;
 }
 
 .form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  background-color: var(--white);
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .formGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .label {
-  font-weight: bold;
-  color: #555;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.hint {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--gray);
 }
 
 .input,
 .textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
   font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--strong-green);
+  box-shadow: 0 0 0 3px rgba(36, 130, 50, 0.1);
 }
 
 .textarea {
@@ -45,136 +84,287 @@
   resize: vertical;
 }
 
-.radioGroup {
-  display: flex;
-  gap: 1rem;
+.searchContainer {
+  margin-bottom: 1.5rem;
+  position: relative;
 }
 
-.radioLabel {
+.searchInput {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s;
+}
+
+.searchInput:focus-within {
+  border-color: var(--strong-green);
+  box-shadow: 0 0 0 3px rgba(36, 130, 50, 0.1);
+}
+
+.searchIcon {
+  margin: 0 0.75rem;
+  color: var(--gray);
+}
+
+.searchInput input {
+  flex: 1;
+  border: none;
+  padding: 0.75rem 0;
+  background: transparent;
+}
+
+.searchInput input:focus {
+  outline: none;
+}
+
+.roleSelect {
+  padding: 0.75rem;
+  border: none;
+  border-left: 1px solid var(--input-border);
+  background-color: #f8f9fa;
+  color: var(--black);
   cursor: pointer;
 }
 
-.radioInput {
-  cursor: pointer;
-}
-
-.friendsList {
+.searchResults,
+.friendsGrid {
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
   max-height: 200px;
   overflow-y: auto;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 0.5rem;
+  margin-top: 0.5rem;
+  background: var(--white);
 }
 
+.searchResultItem,
 .friendItem {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 0.5rem;
-  border-bottom: 1px solid #eee;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--input-border);
+  transition: background-color 0.2s;
 }
 
+.searchResultItem:hover,
+.friendItem:hover {
+  background-color: #f8f9fa;
+}
+
+.searchResultItem:last-child,
 .friendItem:last-child {
   border-bottom: none;
 }
 
-.friendCheckbox {
-  margin-right: 0.5rem;
+.userInfo {
+  flex: 1;
 }
 
-.friendLabel {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
+.userEmail {
+  display: block;
+  font-weight: 500;
+  color: var(--black);
 }
 
-.friendName {
-  font-weight: bold;
+.userName {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--gray);
+  margin-top: 0.25rem;
 }
 
-.friendEmail {
-  font-size: 0.9rem;
-  color: #777;
-}
-
-.emailInputGroup {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.addButton,
-.removeButton {
-  padding: 0.5rem 1rem;
-  background-color: var(--strong-green);
-  color: white;
+.addButton {
+  background: none;
   border: none;
-  border-radius: 4px;
+  color: var(--strong-green);
   cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.addButton:hover,
-.removeButton:hover {
-  background-color: var(--light-green);
-}
-
-.removeButton {
-  background-color: #f44336;
-  font-size: 1.2rem;
-  padding: 0.25rem 0.5rem;
-}
-
-.removeButton:hover {
-  background-color: #d32f2f;
-}
-
-.emailList {
-  margin-top: 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.emailItem {
+  padding: 0.5rem;
+  border-radius: 4px;
   display: flex;
   align-items: center;
-  background-color: #e0e0e0;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  justify-content: center;
+  transition: all 0.2s;
 }
 
-.emailText {
-  margin-right: 0.5rem;
+.addButton:hover {
+  background-color: rgba(36, 130, 50, 0.1);
+  transform: scale(1.05);
 }
 
-.submitButton {
-  padding: 1rem;
-  background-color: var(--strong-green);
-  color: white;
-  border: none;
-  border-radius: 4px;
+.friendsTitle,
+.selectedTitle {
   font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  margin: 1rem 0 0.5rem 0;
+  color: var(--black);
+  font-weight: 600;
 }
 
-.submitButton:hover {
-  background-color: var(--light-green);
+.noFriends {
+  color: var(--gray);
+  font-size: 0.875rem;
+  padding: 0.75rem;
+  text-align: center;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  margin: 0.5rem 0;
+}
+
+.selectedMembers {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--input-border);
+}
+
+.membersList {
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.memberItem {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--input-border);
+  gap: 0.75rem;
+  background: var(--white);
+  transition: background-color 0.2s;
+}
+
+.memberItem:hover {
+  background-color: #f8f9fa;
+}
+
+.memberItem:last-child {
+  border-bottom: none;
+}
+
+.memberEmail {
+  flex: 1;
+  font-weight: 500;
+}
+
+.memberRole {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  background-color: var(--white);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.removeButton:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  transform: scale(1.05);
 }
 
 .error {
-  color: #f44336;
-  margin-bottom: 1rem;
+  color: #dc3545;
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background-color: rgba(220, 53, 69, 0.1);
+  border-radius: 6px;
+  border-left: 4px solid #dc3545;
 }
 
-.success {
-  color: #4caf50;
-  margin-bottom: 1rem;
+.formActions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
 }
 
-.disabledFriend {
-  opacity: 0.5;
+.submitButton {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--strong-green);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 140px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: var(--light-green);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.submitButton:disabled {
+  background-color: var(--gray);
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.searchLoading {
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray);
+}
+
+.loadingContainer {
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .formActions {
+    justify-content: center;
+  }
+
+  .searchInput {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .roleSelect {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--input-border);
+  }
+
+  .memberItem {
+    flex-wrap: wrap;
+  }
+
+  .memberRole {
+    order: 3;
+    margin-left: auto;
+  }
 }

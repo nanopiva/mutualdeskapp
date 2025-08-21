@@ -1,111 +1,179 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import styles from "./page.module.css";
+import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
-import {
-  getUserById,
-  acceptInvitation,
-  declineInvitation,
-  getGroupName,
-} from "@/app/actions";
+import InvitationCardExtended from "../components/InvitationCardExtended/InvitationCardExtended";
+import styles from "./page.module.css";
 
-type Invitation = {
-  invitationId: string;
-  invitationSenderId: string;
-  invitationReceiverId: string;
-  invitationGroupId: string | null;
-  invitationProjectId: string | null;
-  invitationDate: string;
-  invitationRole: string;
-};
+interface Invitation {
+  id: number;
+  sender_id: string;
+  receiver_id: string;
+  group_id: string | null;
+  project_id: string | null;
+  status: string;
+  role: string | null;
+  created_at: string;
+  updated_at: string;
+  sender: {
+    email: string;
+    first_name: string | null;
+    last_name: string | null;
+  };
+  receiver: {
+    email: string;
+    first_name: string | null;
+    last_name: string | null;
+  };
+  group: {
+    name: string;
+  } | null;
+  project: {
+    name: string;
+  } | null;
+}
 
-type User = {
-  first_name: string;
-  last_name: string;
-  email: string;
-};
-
-export default function Invitations() {
+export default function InvitationsPage() {
+  const supabase = createClient();
   const [invitations, setInvitations] = useState<Invitation[]>([]);
-  const [userDetails, setUserDetails] = useState<Record<string, User>>({});
-  const [groupNames, setGroupNames] = useState<Record<string, string>>({});
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const fetchInvitations = async () => {
-    const supabase = await createClient();
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      setError("We couldn't verify your session. Please log in again.");
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("invitations")
-      .select(`id,sender_id,receiver_id,group_id,project_id,created_at,role`)
-      .eq("receiver_id", user.id);
-
-    if (error) {
-      console.error("Error fetching invitations:", error);
-      setError("Error fetching invitations.");
-      return;
-    }
-
-    const formattedInvitations: Invitation[] = data.map((invitation) => ({
-      invitationId: invitation.id,
-      invitationSenderId: invitation.sender_id,
-      invitationReceiverId: invitation.receiver_id,
-      invitationGroupId: invitation.group_id,
-      invitationProjectId: invitation.project_id,
-      invitationDate: invitation.created_at,
-      invitationRole: invitation.role,
-    }));
-
-    setInvitations(formattedInvitations);
-
-    // Fetch details of the users involved
-    const uniqueSenderIds = [...new Set(data.map((inv) => inv.sender_id))];
-    const userFetchPromises = uniqueSenderIds.map((id) => getUserById(id));
-
+    setLoading(true);
     try {
-      const users = await Promise.all(userFetchPromises);
-      const userMap = users.reduce(
-        (acc, user) => {
-          acc[user.id] = user;
-          return acc;
-        },
-        {} as Record<string, User>
-      );
-      setUserDetails(userMap);
-    } catch (fetchError) {
-      console.error("Error fetching user data:", fetchError);
-      setError("Error loading user data.");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      setCurrentUserId(user.id);
+
+      const { data: invitationsData, error: invitationsError } = await supabase
+        .from("invitations")
+        .select(
+          `
+          *,
+          sender: sender_id(email, first_name, last_name),
+          receiver: receiver_id(email, first_name, last_name),
+          group: group_id(name),
+          project: project_id(name)
+        `
+        )
+        .or(
+          `and(receiver_id.eq.${user.id},status.eq.pending),and(sender_id.eq.${user.id},status.eq.pending)`
+        );
+
+      if (invitationsError) throw invitationsError;
+
+      setInvitations(invitationsData || []);
+    } catch (err) {
+      console.error("Error fetching invitations:", err);
+      setError("Failed to load invitations");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // Fetch group names
-    const uniqueGroupIds = [
-      ...new Set(data.map((inv) => inv.group_id).filter(Boolean)),
-    ];
-    const groupFetchPromises = uniqueGroupIds.map((id) => getGroupName(id));
-
+  const handleAccept = async (invitationId: number) => {
     try {
-      const groups = await Promise.all(groupFetchPromises);
-      const groupMap = uniqueGroupIds.reduce(
-        (acc, id, index) => {
-          acc[id] = groups[index];
-          return acc;
-        },
-        {} as Record<string, string>
-      );
-      setGroupNames(groupMap);
-    } catch (groupFetchError) {
-      console.error("Error fetching group data:", groupFetchError);
-      setError("Error loading group data.");
+      const { data: invitation, error: invitationError } = await supabase
+        .from("invitations")
+        .select("*")
+        .eq("id", invitationId)
+        .single();
+
+      if (invitationError || !invitation) {
+        throw invitationError || new Error("Invitation not found");
+      }
+
+      if (!invitation.group_id && !invitation.project_id) {
+        await handleAcceptFriend(invitation);
+      } else if (invitation.group_id) {
+        await handleAcceptGroup(invitation);
+      } else if (invitation.project_id) {
+        await handleAcceptProject(invitation);
+      }
+
+      const { error: deleteError } = await supabase
+        .from("invitations")
+        .delete()
+        .eq("id", invitationId);
+
+      if (deleteError) throw deleteError;
+
+      fetchInvitations();
+    } catch (err) {
+      console.error("Error accepting invitation:", err);
+      setError("Failed to accept invitation");
+    }
+  };
+  const handleAcceptFriend = async (invitation: any) => {
+    const { error } = await supabase.from("friends_links").insert([
+      {
+        first_user_id: invitation.sender_id,
+        second_user_id: invitation.receiver_id,
+      },
+    ]);
+
+    if (error) throw error;
+  };
+
+  const handleAcceptGroup = async (invitation: any) => {
+    const { error } = await supabase.from("group_members").insert([
+      {
+        group_id: invitation.group_id,
+        user_id: invitation.receiver_id,
+        role: invitation.role || "member",
+      },
+    ]);
+
+    if (error) throw error;
+  };
+
+  const handleAcceptProject = async (invitation: any) => {
+    const { error } = await supabase.from("project_members").insert([
+      {
+        project_id: invitation.project_id,
+        user_id: invitation.receiver_id,
+        role: invitation.role || "contributor",
+        group_id: invitation.group_id,
+      },
+    ]);
+
+    if (error) throw error;
+  };
+
+  const handleReject = async (invitationId: number) => {
+    try {
+      const { error } = await supabase
+        .from("invitations")
+        .delete()
+        .eq("id", invitationId);
+
+      if (error) throw error;
+
+      fetchInvitations();
+    } catch (err) {
+      console.error("Error rejecting invitation:", err);
+      setError("Failed to reject invitation");
+    }
+  };
+
+  const handleCancel = async (invitationId: number) => {
+    try {
+      const { error } = await supabase
+        .from("invitations")
+        .delete()
+        .eq("id", invitationId);
+
+      if (error) throw error;
+
+      fetchInvitations();
+    } catch (err) {
+      console.error("Error canceling invitation:", err);
+      setError("Failed to cancel invitation");
     }
   };
 
@@ -113,218 +181,75 @@ export default function Invitations() {
     fetchInvitations();
   }, []);
 
-  const handleAcceptInvitation = async (
-    groupId: string | null,
-    projectId: string | null,
-    role: string | null,
-    invitationId: string,
-    invitationSenderId: string
-  ) => {
-    const result = await acceptInvitation(
-      groupId,
-      projectId,
-      role,
-      invitationId,
-      invitationSenderId
-    );
-
-    if (result) {
-      // Remove the accepted invitation from the UI
-      setInvitations((prevInvitations) =>
-        prevInvitations.filter((inv) => inv.invitationId !== invitationId)
-      );
-    } else {
-      setError("Failed to accept the invitation.");
-    }
-  };
-
-  const handleDeclineInvitation = async (invitationId: string) => {
-    const result = await declineInvitation(invitationId);
-
-    if (result) {
-      // Remove the declined invitation from the UI
-      setInvitations((prevInvitations) =>
-        prevInvitations.filter((inv) => inv.invitationId !== invitationId)
-      );
-    } else {
-      setError("Failed to decline the invitation.");
-    }
-  };
-
-  if (error) {
-    return <p>{error}</p>;
-  }
+  const receivedInvitations = invitations.filter(
+    (inv: Invitation) =>
+      inv.receiver_id === currentUserId && inv.status === "pending"
+  );
+  const sentInvitations = invitations.filter(
+    (inv: Invitation) =>
+      inv.sender_id === currentUserId && inv.status === "pending"
+  );
 
   return (
-    <div className={styles.invitationsContainer}>
-      {/* Group Invitations */}
-      <h2 className={styles.h2}>Group Invitations:</h2>
-      <div className={styles.groupInvitationsContainer}>
-        {invitations.filter((inv) => inv.invitationGroupId).length > 0 ? (
-          invitations
-            .filter((inv) => inv.invitationGroupId)
-            .map((invitation) => {
-              const sender = userDetails[invitation.invitationSenderId];
-              const groupName = invitation.invitationGroupId
-                ? groupNames[invitation.invitationGroupId] || "Loading..."
-                : "Unknown";
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <h1>Invitations</h1>
+      </header>
 
-              return (
-                <div
-                  key={invitation.invitationId}
-                  className={`${styles.invitationDetail} ${styles.responsiveInvitation}`}
-                >
-                  <h3>Group Invitation</h3>
-                  <p className={styles.p}>
-                    Invited by: {sender?.first_name} {sender?.last_name} (
-                    {sender?.email})
-                  </p>
-                  <p className={styles.p}>Group name: {groupName}</p>
-                  <p className={styles.p}>Role: {invitation.invitationRole}</p>
-                  <p className={styles.p}>
-                    Sent on:{" "}
-                    {new Date(invitation.invitationDate).toLocaleDateString()}
-                  </p>
-                  <div className={styles.acceptDeclineButtons}>
-                    <button
-                      onClick={() =>
-                        handleAcceptInvitation(
-                          invitation.invitationGroupId,
-                          invitation.invitationProjectId,
-                          invitation.invitationRole,
-                          invitation.invitationId,
-                          invitation.invitationSenderId
-                        )
-                      }
-                    >
-                      Accept
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleDeclineInvitation(invitation.invitationId)
-                      }
-                    >
-                      Decline
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-        ) : (
-          <p className={styles.p}>No group invitations found.</p>
-        )}
-      </div>
+      {loading ? (
+        <div className={styles.loaderContainer}>
+          <div className="loader"></div>
+        </div>
+      ) : error ? (
+        <div className={styles.error}>{error}</div>
+      ) : (
+        <>
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              Received Invitations ({receivedInvitations.length})
+            </h2>
+            {receivedInvitations.length > 0 ? (
+              <div className={styles.invitationsGrid}>
+                {receivedInvitations.map((invitation: Invitation) => (
+                  <InvitationCardExtended
+                    key={`received-${invitation.id}`}
+                    invitation={invitation}
+                    type="received"
+                    onAccept={() => handleAccept(invitation.id)}
+                    onReject={() => handleReject(invitation.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className={styles.emptyState}>
+                No pending invitations received
+              </div>
+            )}
+          </section>
 
-      {/* Project Invitations */}
-      <h2 className={styles.h2}>Project Invitations:</h2>
-      <div className={styles.projectInvitationsContainer}>
-        {invitations.filter((inv) => inv.invitationProjectId).length > 0 ? (
-          invitations
-            .filter((inv) => inv.invitationProjectId)
-            .map((invitation) => {
-              const sender = userDetails[invitation.invitationSenderId];
-              return (
-                <div
-                  key={invitation.invitationId}
-                  className={`${styles.invitationDetail} ${styles.responsiveInvitation}`}
-                >
-                  <h3>Project Invitation</h3>
-                  <p className={styles.p}>
-                    Invited by: {sender?.first_name} {sender?.last_name} (
-                    {sender?.email})
-                  </p>
-                  <p className={styles.p}>
-                    Project ID: {invitation.invitationProjectId}
-                  </p>
-                  <p className={styles.p}>Role: {invitation.invitationRole}</p>
-                  <p className={styles.p}>
-                    Sent on:{" "}
-                    {new Date(invitation.invitationDate).toLocaleDateString()}
-                  </p>
-                  <div className={styles.acceptDeclineButtons}>
-                    <button
-                      onClick={() =>
-                        handleAcceptInvitation(
-                          invitation.invitationGroupId,
-                          invitation.invitationProjectId,
-                          invitation.invitationRole,
-                          invitation.invitationId,
-                          invitation.invitationSenderId
-                        )
-                      }
-                    >
-                      Accept
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleDeclineInvitation(invitation.invitationId)
-                      }
-                    >
-                      Decline
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-        ) : (
-          <p className={styles.p}>No project invitations found.</p>
-        )}
-      </div>
-
-      {/* Friend Invitations */}
-      <h2 className={styles.h2}>Friend Invitations:</h2>
-      <div className={styles.friendInvitationsContainer}>
-        {invitations.filter(
-          (inv) => !inv.invitationGroupId && !inv.invitationProjectId
-        ).length > 0 ? (
-          invitations
-            .filter((inv) => !inv.invitationGroupId && !inv.invitationProjectId)
-            .map((invitation) => {
-              const sender = userDetails[invitation.invitationSenderId];
-
-              return (
-                <div
-                  key={invitation.invitationId}
-                  className={`${styles.invitationDetail} ${styles.responsiveInvitation}`}
-                >
-                  <h3>Friend Invitation</h3>
-                  <p className={styles.p}>
-                    Invited by: {sender?.first_name} {sender?.last_name} (
-                    {sender?.email})
-                  </p>
-                  <p className={styles.p}>
-                    Sent on:{" "}
-                    {new Date(invitation.invitationDate).toLocaleDateString()}
-                  </p>
-                  <div className={styles.acceptDeclineButtons}>
-                    <button
-                      onClick={() =>
-                        handleAcceptInvitation(
-                          invitation.invitationGroupId,
-                          invitation.invitationProjectId,
-                          invitation.invitationRole,
-                          invitation.invitationId,
-                          invitation.invitationSenderId
-                        )
-                      }
-                    >
-                      Accept
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleDeclineInvitation(invitation.invitationId)
-                      }
-                    >
-                      Decline
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-        ) : (
-          <p className={styles.p}>No friend invitations found.</p>
-        )}
-      </div>
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              Sent Invitations ({sentInvitations.length})
+            </h2>
+            {sentInvitations.length > 0 ? (
+              <div className={styles.invitationsGrid}>
+                {sentInvitations.map((invitation: Invitation) => (
+                  <InvitationCardExtended
+                    key={`sent-${invitation.id}`}
+                    invitation={invitation}
+                    type="sent"
+                    onCancel={() => handleCancel(invitation.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className={styles.emptyState}>
+                No pending invitations sent
+              </div>
+            )}
+          </section>
+        </>
+      )}
     </div>
   );
 }

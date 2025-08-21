@@ -1,17 +1,14 @@
 import styles from "./aboutitem.module.css";
-import Image, { StaticImageData } from "next/image";
-import type { JSX } from "react";
+import type { JSX, ReactNode } from "react";
 
 interface AboutItemProps {
-  image: StaticImageData;
-  alt: string;
+  icon: ReactNode;
   title: string;
   description: JSX.Element;
 }
 
 export default function AboutItem({
-  image,
-  alt,
+  icon,
   title,
   description,
 }: AboutItemProps) {
@@ -22,9 +19,7 @@ export default function AboutItem({
           <h2 className={styles.aboutItemTitle}>{title}</h2>
           <div className={styles.aboutItemDescription}>{description}</div>
         </div>
-        <div className={styles.aboutItemImageWrapper}>
-          <Image className={styles.aboutItemImage} src={image} alt={alt} />
-        </div>
+        <div className={styles.aboutItemIconWrapper}>{icon}</div>
       </div>
     </section>
   );

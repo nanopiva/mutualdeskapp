@@ -1,157 +1,184 @@
-/* Main Container */
-.friendsPanelContainer {
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  min-height: 60vh;
+  position: relative;
+}
+
+.header {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 1rem;
-}
-/* Title */
-.title {
-  font-size: clamp(2rem, 5vw, 3rem);
-  text-align: center;
-  margin-bottom: 40px;
-  font-weight: bold;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
 }
 
-.highlight {
-  color: var(--light-green);
-  font-weight: bold;
-}
-.notHighlight {
+.header h1 {
+  margin: 0;
   color: var(--strong-green);
-  font-weight: 500;
+  font-size: 2rem;
+  font-weight: 600;
 }
 
-/* Friends List */
-.friendsContainer {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
-  width: 100%;
-  max-width: 1200px; /* Limitar el ancho máximo del contenedor */
-  margin: 0 auto;
-}
-
-.friendCard {
-  background-color: var(--gray);
-  color: var(--white);
-  border-radius: 16px;
-  padding: 24px;
-
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.friendSince {
-  font-size: 1rem;
-  margin-top: 12px;
-  color: var(--gray-light);
-}
-
-/* No Friends */
-.noFriends {
-  text-align: center;
-  font-size: 1.2rem;
-  color: var(--light-gray);
-  margin-top: 20px;
-}
-
-/* Add Friend Button */
-.addFriendButton {
-  display: block;
-  padding: 14px 28px;
-  margin: 40px auto 0;
-  background-color: var(--strong-green);
-  color: var(--white);
-  border: none;
-  border-radius: 8px;
-  font-size: 1.2rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.addFriendButton:hover {
-  background-color: var(--light-green);
-}
-
-/* Modal Styles */
-.modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
+.actions {
   display: flex;
-  justify-content: center;
+  gap: 1rem;
   align-items: center;
 }
 
-.modalContent {
-  background-color: var(--white);
-  padding: 24px;
-  border-radius: 12px;
-  width: 90%;
+.searchBar {
+  flex: 1;
   max-width: 400px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-}
-
-.emailInput {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 20px;
-  border: 1px solid var(--gray-light);
-  border-radius: 8px;
-}
-
-/* Modal Actions */
-.modalActions {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  background-color: var(--white);
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease;
 }
 
-.modalActions button {
-  padding: 10px 16px;
+.searchBar:focus-within {
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 2px rgba(36, 130, 50, 0.1);
+}
+
+.searchBar input {
+  flex: 1;
   border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.modalActions button:first-child {
-  background-color: var(--strong-green);
-  color: var(--white);
-}
-
-.modalActions button:first-child:hover {
-  background-color: var(--light-green);
-}
-
-.modalActions button:last-child {
-  background-color: var(--gray-light);
+  outline: none;
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+  background: transparent;
   color: var(--black);
 }
 
-.modalActions button:last-child:hover {
-  background-color: var(--gray-dark);
+.searchBar input::placeholder {
+  color: var(--gray);
 }
 
-/* User Details */
-.userDetails {
-  text-align: center;
-}
-.addAFriendTitle {
-  text-align: center;
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--button-bg);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(36, 130, 50, 0.3);
 }
 
-.errorMessage {
-  padding: 0.5rem 1rem;
-  border-left: 4px solid;
-  border-radius: 5px;
-  margin: 0.5rem 0;
-  background-color: #f9f9f9; /* Soft background for visibility */
-  color: #dc3545; /* Error text color */
-  border-color: #dc3545; /* Error border color */
+.addButton:hover {
+  background-color: var(--button-bg-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(36, 130, 50, 0.4);
+}
+
+.loaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  width: 100%;
+}
+
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: #e74c3c;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  margin: 1rem 0;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--black);
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.friendsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.emptyState {
+  background-color: var(--white);
+  border-radius: 8px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: var(--gray);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .searchBar {
+    max-width: none;
+    order: 2;
+  }
+
+  .addButton {
+    order: 1;
+    justify-content: center;
+  }
+
+  .friendsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .header h1 {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.125rem;
+  }
+
+  .searchBar {
+    padding: 0.625rem 0.875rem;
+  }
+
+  .addButton {
+    padding: 0.625rem 1rem;
+  }
+
+  .emptyState {
+    padding: 2rem 1rem;
+  }
 }

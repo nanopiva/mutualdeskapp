@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
 import AvatarIcon from "../../components/AvatarIcon/AvatarIcon";
 import styles from "./page.module.css";
+import ChangePasswordModal from "./ChangePasswordModal";
 
 const ProfilePage = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -12,11 +13,15 @@ const ProfilePage = () => {
     first_name: "",
     last_name: "",
     email: "",
-    password: "",
   });
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [avatarTimestamp, setAvatarTimestamp] = useState(Date.now());
+  const [currentAvatarExt, setCurrentAvatarExt] = useState<string | null>(null);
+
   const supabase = createClient();
 
   useEffect(() => {
@@ -52,8 +57,19 @@ const ProfilePage = () => {
           first_name: profile?.first_name || "",
           last_name: profile?.last_name || "",
           email: user.email || "",
-          password: "",
         });
+
+        const { data: files, error: listError } = await supabase.storage
+          .from("profilepictures")
+          .list(user.id);
+
+        if (!listError && files?.length) {
+          const profileFile = files.find((f) => f.name.startsWith("profile."));
+          if (profileFile) {
+            const ext = profileFile.name.split(".").pop();
+            setCurrentAvatarExt(ext || null);
+          }
+        }
       } catch (error) {
         console.error("Unexpected error:", error);
       } finally {
@@ -71,7 +87,6 @@ const ProfilePage = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
-      // Opcional: Puedes agregar aquí lógica para previsualizar la imagen seleccionada
     }
   };
 
@@ -84,25 +99,39 @@ const ProfilePage = () => {
     e.preventDefault();
 
     try {
-      setLoading(true);
+      setUpdating(true);
 
       if (!user) {
         console.error("User is null");
         return;
       }
-      if (selectedFile) {
-        const filePath = `${user.id}/profile.jpg`;
-        const { error: uploadError } = await supabase.storage
-          .from("profilepictures")
-          .upload(filePath, selectedFile, {
-            upsert: true, // Reemplaza si ya existe
-          });
 
-        if (uploadError) {
-          throw uploadError;
+      if (selectedFile) {
+        const ext = selectedFile.name.split(".").pop()?.toLowerCase() || "jpg";
+        const filePath = `${user.id}/profile.${ext}`;
+
+        const { data: existingFiles } = await supabase.storage
+          .from("profilepictures")
+          .list(user.id);
+
+        if (existingFiles?.length) {
+          for (const file of existingFiles) {
+            if (file.name.startsWith("profile.")) {
+              await supabase.storage
+                .from("profilepictures")
+                .remove([`${user.id}/${file.name}`]);
+            }
+          }
         }
 
-        console.log("Profile picture uploaded successfully");
+        const { error: uploadError } = await supabase.storage
+          .from("profilepictures")
+          .upload(filePath, selectedFile);
+
+        if (uploadError) throw uploadError;
+
+        setAvatarTimestamp(Date.now());
+        setCurrentAvatarExt(ext);
       }
 
       const { error: profileError } = await supabase
@@ -114,24 +143,37 @@ const ProfilePage = () => {
         .eq("id", user.id);
 
       if (profileError) throw profileError;
-
-      console.log("Profile updated successfully");
     } catch (error) {
       console.error("Error updating profile:", error);
     } finally {
-      setLoading(false);
+      setUpdating(false);
     }
   };
 
-  const profilePictureURL = `https://kckpcncvhqcxfvzinkto.supabase.co/storage/v1/object/public/profilepictures/${user?.id}/profile.jpg`;
+  const profilePictureURL = selectedFile
+    ? URL.createObjectURL(selectedFile)
+    : user && currentAvatarExt
+      ? `https://kckpcncvhqcxfvzinkto.supabase.co/storage/v1/object/public/profilepictures/${user.id}/profile.${currentAvatarExt}?t=${avatarTimestamp}`
+      : "";
 
-  if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <div className={styles.profilePage}>
+        <div className={styles.loadingContainer}>
+          <div
+            className="loader"
+            style={{ width: "40px", height: "40px" }}
+          ></div>
+        </div>
+      </div>
+    );
 
   if (!user) return <p>You need to log in to view this page.</p>;
 
   return (
     <div className={styles.profilePage}>
       <h1 className={styles.pageTitle}>Profile</h1>
+
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGroupAvatar}>
           <label htmlFor="profile_picture" className={styles.avatarLabel}>
@@ -157,11 +199,12 @@ const ProfilePage = () => {
             type="file"
             id="profile_picture"
             ref={fileInputRef}
-            className={styles.uploadProfilePictureInput}
+            accept="image/*"
             onChange={handleFileChange}
             style={{ display: "none" }}
           />
         </div>
+
         <div className={styles.formGroup}>
           <label htmlFor="first_name" className={styles.label}>
             First Name
@@ -175,6 +218,7 @@ const ProfilePage = () => {
             className={styles.input}
           />
         </div>
+
         <div className={styles.formGroup}>
           <label htmlFor="last_name" className={styles.label}>
             Last Name
@@ -188,33 +232,49 @@ const ProfilePage = () => {
             className={styles.input}
           />
         </div>
+
         <div className={styles.formGroup}>
           <label htmlFor="email" className={styles.label}>
             Email
           </label>
           <div className={styles.emailDisplay}>{formData.email}</div>
         </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="password" className={styles.label}>
-            New Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className={styles.input}
-          />
-        </div>
+
         <button
           type="submit"
           className={styles.submitButton}
-          disabled={loading}
+          disabled={updating}
         >
-          Update Profile
+          {updating ? (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div
+                className="loader"
+                style={{ width: "18px", height: "18px", marginRight: "8px" }}
+              ></div>
+              Updating...
+            </div>
+          ) : (
+            "Update Profile"
+          )}
         </button>
       </form>
+
+      <button
+        className={styles.changePasswordButton}
+        onClick={() => setPasswordModalOpen(true)}
+      >
+        Change Password
+      </button>
+
+      {passwordModalOpen && (
+        <ChangePasswordModal onClose={() => setPasswordModalOpen(false)} />
+      )}
     </div>
   );
 };

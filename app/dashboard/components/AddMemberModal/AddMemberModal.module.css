@@ -1,0 +1,339 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background-color: var(--white);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  color: var(--black);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--gray);
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  color: var(--black);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.searchContainer {
+  position: relative;
+}
+
+.searchInput {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  transition: all 0.2s ease;
+  background: var(--white);
+}
+
+.searchInput:focus-within {
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 3px rgba(36, 130, 50, 0.1);
+}
+
+.searchInput input {
+  flex: 1;
+  border: none;
+  outline: none;
+  margin-left: 0.5rem;
+  font-size: 0.9rem;
+  background: transparent;
+  color: var(--black);
+}
+
+.searchInput input::placeholder {
+  color: var(--gray);
+}
+
+.searchResults {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--white);
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  margin-top: 0.35rem;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.searchResultItem {
+  padding: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.searchResultItem:last-child {
+  border-bottom: none;
+}
+
+.searchResultItem:hover {
+  background-color: rgba(43, 168, 74, 0.08);
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.userEmail {
+  font-weight: 500;
+  color: var(--black);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.userName {
+  font-size: 0.75rem;
+  color: var(--gray);
+  margin: 0;
+}
+
+.roleSelection {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.roleSelection label {
+  font-size: 0.9rem;
+  color: var(--black);
+  font-weight: 500;
+}
+
+.roleSelection select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s ease;
+  background: var(--white);
+  color: var(--black);
+  cursor: pointer;
+}
+
+.roleSelection select:focus {
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 3px rgba(36, 130, 50, 0.1);
+}
+
+.selectedUsers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.selectedUsers h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--black);
+  font-weight: 600;
+}
+
+.selectedUsersList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.selectedUser {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: rgba(43, 168, 74, 0.05);
+  border-radius: 6px;
+  border: 1px solid rgba(43, 168, 74, 0.1);
+  transition: all 0.2s ease;
+}
+
+.selectedUser:hover {
+  background-color: rgba(43, 168, 74, 0.08);
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  color: var(--gray);
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.removeButton:hover {
+  color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+.error {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin: 0;
+  padding: 0.75rem;
+  background-color: rgba(231, 76, 60, 0.08);
+  border-radius: 6px;
+  border-left: 3px solid #e74c3c;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.cancelButton {
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--gray);
+  border-radius: 6px;
+  background: none;
+  color: var(--gray);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.cancelButton:hover:not(:disabled) {
+  background-color: rgba(45, 58, 58, 0.08);
+  color: var(--black);
+}
+
+.cancelButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submitButton {
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--button-bg);
+  color: var(--white);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 140px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: var(--button-bg-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.submitButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.searchLoading {
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .modal {
+    padding: 1.25rem;
+  }
+
+  .modalHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .modalHeader h3 {
+    font-size: 1.1rem;
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
+
+  .cancelButton,
+  .submitButton {
+    width: 100%;
+  }
+
+  .roleSelection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .roleSelection select {
+    width: 100%;
+  }
+}

@@ -1,270 +1,321 @@
 "use client";
 
-import styles from "./page.module.css";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { getUserById } from "@/app/actions";
+import { UserPlus, UserX, UserCheck, User, Search } from "lucide-react";
 import FriendCard from "../components/FriendCard/FriendCard";
-import { fetchUserIdByEmail } from "@/app/actions";
-import { handleDeleteFriend } from "@/app/actions";
+import AddFriendModal from "../components/AddFriendModal/AddFriendModal";
+import styles from "./page.module.css";
 
-type FriendLinkData = {
-  linkId: string;
-  linkFUserId: string;
-  linkSUserId: string;
-  linkData: string;
-};
+interface Friend {
+  id: number | null;
+  user_id: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  created_at: string;
+  status: "friend" | "sent" | "received";
+  invitation_id?: number;
+}
 
-export default function FriendsPanel() {
-  const [myFriends, setMyFriends] = useState<FriendLinkData[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [email, setEmail] = useState("");
-  const [currentUserId, setCurrentUserId] = useState("");
+export default function FriendsPage() {
+  const supabase = createClient();
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showAddFriendModal, setShowAddFriendModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const fetchLinks = async () => {
-    const supabase = await createClient();
+  const fetchFriends = async () => {
+    setLoading(true);
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+      const { data: friendsData, error: friendsError } = await supabase.rpc(
+        "get_friends_with_status",
+        { current_user_id: user.id }
+      );
 
-    if (userError || !user) {
-      setError("We could not verify your session. Please log in again.");
-      return;
+      if (friendsError) throw friendsError;
+
+      setFriends(friendsData || []);
+    } catch (err) {
+      console.error("Error fetching friends:", err);
+      setError("Failed to load friends");
+    } finally {
+      setLoading(false);
     }
-    setCurrentUserId(user.id);
+  };
 
-    const { data, error } = await supabase
-      .from("friends_links")
-      .select(`id,first_user_id,second_user_id,created_at`)
-      .or(`first_user_id.eq.${user.id},second_user_id.eq.${user.id}`);
+  const handleSendFriendRequest = async (receiverId: string) => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
 
-    if (error) {
-      console.error("Error fetching friend links:", error);
-      setError("Error fetching friend links.");
-      return;
+      const { data: existingFriend } = await supabase
+        .from("friends_links")
+        .select("*")
+        .or(
+          `and(first_user_id.eq.${user.id},second_user_id.eq.${receiverId}),and(first_user_id.eq.${receiverId},second_user_id.eq.${user.id})`
+        )
+        .single();
+
+      if (existingFriend) {
+        throw new Error("This user is already your friend");
+      }
+
+      const { data: existingInvitation } = await supabase
+        .from("invitations")
+        .select("*")
+        .eq("sender_id", user.id)
+        .eq("receiver_id", receiverId)
+        .eq("status", "pending")
+        .is("group_id", null)
+        .is("project_id", null)
+        .single();
+
+      if (existingInvitation) {
+        throw new Error("Friend request already sent");
+      }
+
+      const { error } = await supabase.from("invitations").insert([
+        {
+          sender_id: user.id,
+          receiver_id: receiverId,
+          status: "pending",
+        },
+      ]);
+
+      if (error) throw error;
+
+      fetchFriends();
+    } catch (err) {
+      console.error("Error sending friend request:", err);
+      setError(
+        err instanceof Error ? err.message : "Failed to send friend request"
+      );
     }
+  };
 
-    const formattedFriendsLink: FriendLinkData[] = data.map((friend) => ({
-      linkId: friend.id,
-      linkFUserId: friend.first_user_id,
-      linkSUserId: friend.second_user_id,
-      linkData: friend.created_at,
-    }));
+  const handleAcceptRequest = async (invitationId: number) => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
 
-    setMyFriends(formattedFriendsLink);
+      const { data: invitation, error: invitationError } = await supabase
+        .from("invitations")
+        .select("*")
+        .eq("id", invitationId)
+        .single();
+
+      if (invitationError || !invitation) {
+        throw invitationError || new Error("Invitation not found");
+      }
+
+      const { data: existingFriend } = await supabase
+        .from("friends_links")
+        .select("*")
+        .or(
+          `and(first_user_id.eq.${invitation.sender_id},second_user_id.eq.${invitation.receiver_id}),and(first_user_id.eq.${invitation.receiver_id},second_user_id.eq.${invitation.sender_id})`
+        )
+        .single();
+
+      if (existingFriend) {
+        await supabase
+          .from("invitations")
+          .update({ status: "accepted", updated_at: new Date().toISOString() })
+          .eq("id", invitationId);
+      } else {
+        const { error: friendError } = await supabase
+          .from("friends_links")
+          .insert([
+            {
+              first_user_id: invitation.sender_id,
+              second_user_id: invitation.receiver_id,
+            },
+          ]);
+
+        if (friendError) throw friendError;
+
+        await supabase
+          .from("invitations")
+          .update({ status: "accepted", updated_at: new Date().toISOString() })
+          .eq("id", invitationId);
+      }
+
+      fetchFriends();
+    } catch (err) {
+      console.error("Error accepting friend request:", err);
+      setError("Failed to accept friend request");
+    }
+  };
+
+  const handleCancelRequest = async (invitationId: number) => {
+    try {
+      const { error } = await supabase
+        .from("invitations")
+        .delete()
+        .eq("id", invitationId);
+
+      if (error) throw error;
+
+      fetchFriends();
+    } catch (err) {
+      console.error("Error canceling friend request:", err);
+      setError("Failed to cancel friend request");
+    }
+  };
+
+  const handleRemoveFriend = async (friendshipId: number) => {
+    try {
+      const { error } = await supabase
+        .from("friends_links")
+        .delete()
+        .eq("id", friendshipId);
+
+      if (error) throw error;
+
+      fetchFriends();
+    } catch (err) {
+      console.error("Error removing friend:", err);
+      setError("Failed to remove friend");
+    }
   };
 
   useEffect(() => {
-    fetchLinks();
+    fetchFriends();
   }, []);
 
-  const deleteFriend = async (friendId: string) => {
-    const success = await handleDeleteFriend(friendId);
-    if (success) {
-      // Remove the deleted friend from the UI
-      setMyFriends((prevFriends) =>
-        prevFriends.filter(
-          (friend) =>
-            friend.linkFUserId !== friendId && friend.linkSUserId !== friendId
-        )
-      );
-    }
-  };
+  const filteredFriends = friends.filter(
+    (friend) =>
+      friend.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      `${friend.first_name} ${friend.last_name}`
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
+  );
 
-  const handleAddFriend = async () => {
-    if (!email) {
-      alert("Please enter a valid email.");
-      return;
-    }
-
-    try {
-      const supabase = await createClient();
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        setError("We could not verify your session. Please log in again.");
-        return;
-      }
-
-      const senderId = user.id;
-      const invitedId: string = await fetchUserIdByEmail(email);
-
-      if (!invitedId) {
-        setError("No user found with the given email.");
-        return;
-      }
-
-      // Check for existing invitations
-      const { data: sentInvites, error: sentError } = await supabase
-        .from("invitations")
-        .select("id")
-        .eq("sender_id", senderId)
-        .eq("receiver_id", invitedId)
-        .eq("status", "pending");
-
-      const { data: receivedInvites, error: receivedError } = await supabase
-        .from("invitations")
-        .select("id")
-        .eq("sender_id", invitedId)
-        .eq("receiver_id", senderId)
-        .eq("status", "pending");
-
-      if (sentError || receivedError) {
-        console.error(
-          "Error checking invitations:",
-          sentError || receivedError
-        );
-        setError("Error checking existing invitations.");
-        return;
-      }
-
-      if (sentInvites.length > 0 || receivedInvites.length > 0) {
-        setError("There is already a pending invitation.");
-        return;
-      }
-
-      // Check if already friends
-      const { data: friendLinks, error: friendError } = await supabase
-        .from("friends_links")
-        .select("id, first_user_id, second_user_id")
-        .or(`first_user_id.eq.${senderId},second_user_id.eq.${senderId}`)
-        .or(`first_user_id.eq.${invitedId},second_user_id.eq.${invitedId}`);
-
-      if (friendError) {
-        console.error("Error checking friend links:", friendError);
-        setError("Error checking existing friends.");
-        return;
-      }
-
-      const alreadyFriends = friendLinks.some(
-        (friend) =>
-          (friend.first_user_id === senderId &&
-            friend.second_user_id === invitedId) ||
-          (friend.first_user_id === invitedId &&
-            friend.second_user_id === senderId)
-      );
-
-      if (alreadyFriends) {
-        setError("You are already friends.");
-        return;
-      }
-
-      // Insert new invitation
-      const { error: insertError } = await supabase.from("invitations").insert({
-        sender_id: senderId,
-        receiver_id: invitedId,
-        status: "pending",
-      });
-
-      if (insertError) {
-        console.error("Error inserting invitation:", insertError);
-        setError("Error sending friend request.");
-        return;
-      }
-
-      console.log("Friend request sent to:", email);
-      setIsModalOpen(false);
-      setEmail("");
-    } catch (error) {
-      console.error("Error adding friend:", error);
-      setError("An unexpected error occurred.");
-    }
-  };
+  const currentFriends = filteredFriends.filter((f) => f.status === "friend");
+  const sentRequests = filteredFriends.filter((f) => f.status === "sent");
+  const receivedRequests = filteredFriends.filter(
+    (f) => f.status === "received"
+  );
 
   return (
-    <div className={styles.friendsPanelContainer}>
-      <h1 className={styles.title}>Friends panel</h1>
-      <div className={styles.friendsContainer}>
-        {myFriends.length > 0 ? (
-          myFriends.map((friendLink) => {
-            const friendUserId =
-              friendLink.linkFUserId === currentUserId
-                ? friendLink.linkSUserId
-                : friendLink.linkFUserId;
-
-            return (
-              <UserDetails
-                key={friendLink.linkId}
-                userId={friendUserId}
-                friendSince={friendLink.linkData}
-                onDelete={deleteFriend}
-              />
-            );
-          })
-        ) : (
-          <p className={styles.noFriends}>You don't have any friends yet.</p>
-        )}
-      </div>
-      <button
-        className={styles.addFriendButton}
-        onClick={() => setIsModalOpen(true)}
-      >
-        Add a Friend
-      </button>
-
-      {isModalOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <h3 className={styles.addAFriendTitle}>Add a Friend</h3>
-            {error && <p className={styles.errorMessage}>{error}</p>}
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <h1>Friends</h1>
+        <div className={styles.actions}>
+          <div className={styles.searchBar}>
+            <Search size={16} />
             <input
-              type="email"
-              placeholder="Enter your friend's email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={styles.emailInput}
+              type="text"
+              placeholder="Search friends..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <div className={styles.modalActions}>
-              <button onClick={handleAddFriend}>Add</button>
-              <button onClick={() => setIsModalOpen(false)}>Cancel</button>
-            </div>
           </div>
+          <button
+            onClick={() => setShowAddFriendModal(true)}
+            className={styles.addButton}
+          >
+            <UserPlus size={16} />
+            <span>Add Friend</span>
+          </button>
         </div>
+      </header>
+
+      {loading ? (
+        <div className={styles.loaderContainer}>
+          <div className="loader"></div>
+        </div>
+      ) : error ? (
+        <div className={styles.error}>{error}</div>
+      ) : (
+        <>
+          {receivedRequests.length > 0 && (
+            <section className={styles.section}>
+              <h2 className={styles.sectionTitle}>
+                <UserCheck size={20} /> Pending Requests
+              </h2>
+              <div className={styles.friendsGrid}>
+                {receivedRequests.map((friend) => (
+                  <FriendCard
+                    key={`received-${friend.invitation_id}`}
+                    friend={friend}
+                    onAccept={() =>
+                      friend.invitation_id &&
+                      handleAcceptRequest(friend.invitation_id)
+                    }
+                    onRemove={() =>
+                      friend.invitation_id &&
+                      handleCancelRequest(friend.invitation_id)
+                    }
+                    status="received"
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {sentRequests.length > 0 && (
+            <section className={styles.section}>
+              <h2 className={styles.sectionTitle}>
+                <UserCheck size={20} /> Sent Requests
+              </h2>
+              <div className={styles.friendsGrid}>
+                {sentRequests.map((friend) => (
+                  <FriendCard
+                    key={`sent-${friend.invitation_id}`}
+                    friend={friend}
+                    onRemove={() =>
+                      friend.invitation_id &&
+                      handleCancelRequest(friend.invitation_id)
+                    }
+                    status="sent"
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <User size={20} /> My Friends ({currentFriends.length})
+            </h2>
+            {currentFriends.length > 0 ? (
+              <div className={styles.friendsGrid}>
+                {currentFriends.map((friend) => (
+                  <FriendCard
+                    key={`friend-${friend.id}`}
+                    friend={friend}
+                    onRemove={() => friend.id && handleRemoveFriend(friend.id)}
+                    status="friend"
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className={styles.emptyState}>
+                <p>You don't have any friends yet. Add some!</p>
+              </div>
+            )}
+          </section>
+        </>
+      )}
+
+      {showAddFriendModal && (
+        <AddFriendModal
+          currentFriends={friends.map((f) => f.user_id)}
+          onClose={() => setShowAddFriendModal(false)}
+          onSuccess={fetchFriends}
+        />
       )}
     </div>
   );
 }
-
-const UserDetails = ({
-  userId,
-  friendSince,
-  onDelete,
-}: {
-  userId: string;
-  friendSince: string;
-  onDelete: (friendId: string) => void;
-}) => {
-  const [userDetails, setUserDetails] = useState<any | null>(null);
-
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      const user = await getUserById(userId);
-      setUserDetails(user);
-    };
-
-    fetchUserDetails();
-  }, [userId]);
-
-  if (!userDetails) {
-    return <p>Loading friend details...</p>;
-  }
-
-  return (
-    <FriendCard
-      firstName={userDetails.first_name}
-      lastName={userDetails.last_name}
-      email={userDetails.email}
-      profilePicture={userDetails.profile_picture || ""}
-      created_at={userDetails.created_at}
-      friend_since={new Date(friendSince)}
-      id={userDetails.id}
-      onDelete={onDelete}
-    />
-  );
-};

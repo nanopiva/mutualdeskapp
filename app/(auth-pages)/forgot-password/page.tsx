@@ -1,4 +1,4 @@
-import { forgotPasswordAction } from "@/app/actions";
+import { forgotPasswordAction } from "@/app/actions/auth/forgot-password";
 import {
   FormMessage,
   Message,
@@ -6,30 +6,32 @@ import {
 import Link from "next/link";
 import styles from "./page.module.css";
 
-export default async function ForgotPassword(props: {
-  searchParams: Promise<Message>;
+export default async function ForgotPassword({
+  searchParams,
+}: {
+  searchParams: Message;
 }) {
-  const searchParams = await props.searchParams;
   const isSuccess = "success" in searchParams;
 
   return (
-    <main className={styles.container}>
-      <form className={styles.form}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>Reset Password</h1>
-          <p className={styles.subtext}>
-            Already have an account?{" "}
-            <Link className={styles.link} href="/sign-in">
-              Sign in
-            </Link>
-          </p>
-        </header>
+    <main className={styles.main} role="main">
+      <section className={styles.card}>
+        <h1 className={styles.title}>
+          {isSuccess ? "Check your email" : "Reset your password"}
+        </h1>
+        <p className={styles.subtitle}>
+          {isSuccess
+            ? "We've sent a password reset link to your email"
+            : "Enter your email to receive a password reset link"}
+        </p>
 
-        <div className={styles.formBody}>
-          {!isSuccess && (
-            <>
+        <FormMessage message={searchParams} />
+
+        {!isSuccess && (
+          <form className={styles.form}>
+            <div className={styles.formGroup}>
               <label htmlFor="email" className={styles.label}>
-                Email
+                Email address
               </label>
               <input
                 type="email"
@@ -38,18 +40,34 @@ export default async function ForgotPassword(props: {
                 placeholder="you@example.com"
                 required
                 className={styles.input}
+                autoComplete="email"
+                aria-required="true"
+                aria-describedby="email-help"
               />
-              <button
-                className={styles.button}
-                formAction={forgotPasswordAction}
-              >
-                Reset Password
-              </button>
-            </>
-          )}
-          <FormMessage message={searchParams} />
+              <small id="email-help" className={styles.helpText}>
+                We'll never share your email
+              </small>
+            </div>
+
+            <button
+              type="submit"
+              className={styles.button}
+              formAction={forgotPasswordAction}
+            >
+              Send reset link
+            </button>
+          </form>
+        )}
+
+        <div className={styles.footer}>
+          <p className={styles.backToLogin}>
+            Remember your password?{" "}
+            <Link href="/sign-in" className={styles.link}>
+              Sign in
+            </Link>
+          </p>
         </div>
-      </form>
+      </section>
     </main>
   );
 }

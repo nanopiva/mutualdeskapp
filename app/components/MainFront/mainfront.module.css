@@ -1,44 +1,48 @@
 .mainfrontContainer {
   display: flex;
   flex-wrap: wrap;
-  padding: 0px 1.5rem;
-  position: relative;
+  padding: 0 1.5rem;
   max-width: 100%;
   margin: 0 auto;
-  height: 100%;
+  min-height: calc(100vh - 80px);
+  align-items: center;
+  justify-content: space-between;
 }
 
-.mainfrontDescription,
-.mainfrontImageContainer {
-  width: 48%;
-  min-width: 300px;
-}
 .mainfrontDescription {
-  flex-basis: 55%;
+  flex: 1;
+  min-width: 300px;
+  padding: 2rem 0;
 }
+
 .mainfrontImageContainer {
+  flex: 1;
+  min-width: 300px;
   display: flex;
-  flex-basis: 45%;
+  justify-content: center;
   align-items: center;
+  padding: 2rem;
 }
 
 .mainfrontImage {
   width: 100%;
-  max-width: 40rem;
-  margin: 3rem auto;
-  height: 550px;
+  height: auto;
+  max-height: 600px;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .subtitleDescription {
   color: var(--dark-blue);
-  margin: 3rem 0;
+  margin: 1rem 0;
   display: block;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   letter-spacing: 0.02em;
   font-weight: bold;
   line-height: 1.3;
   text-transform: uppercase;
 }
+
 .subtitleDescription::before {
   position: relative;
   bottom: -0.1em;
@@ -53,22 +57,23 @@
 
 .titleDescription {
   color: var(--dark-blue);
-  font-size: 4.5rem;
+  font-size: clamp(2rem, 5vw, 4.5rem);
   font-weight: bold;
   line-height: 1.1;
-  margin-bottom: 4rem;
+  margin-bottom: 2rem;
   letter-spacing: -0.03em;
 }
 
 .textDescription {
   color: var(--gray);
-  font-size: 1.1rem;
+  font-size: clamp(1rem, 1.2vw, 1.1rem);
   opacity: 0.8;
   line-height: 1.6;
+  max-width: 600px;
 }
 
 .loginContainerDescription {
-  margin-top: 4rem;
+  margin-top: 3rem;
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -80,23 +85,23 @@
   text-align: center;
   background: var(--strong-green);
   padding: 1rem 2rem;
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #fff;
   text-transform: uppercase;
-  font-family: var(--font);
   font-weight: bold;
   border-radius: 0.4rem;
   border: 2px solid var(--strong-green);
-  transition: transform 0.3s;
-  backface-visibility: hidden;
-  will-change: transform;
+  transition: all 0.3s ease;
   cursor: pointer;
+  min-width: 150px;
 }
+
 .signupButtonDescription {
   border-color: var(--light-green);
   background-color: var(--white);
   color: var(--black);
 }
+
 .signupButtonDescription:hover {
   transform: scale(1.02);
   background-color: var(--light-green);
@@ -104,59 +109,64 @@
   border-color: var(--light-green);
 }
 
-/* Responsive adjustments */
+.loginButtonDescription:hover {
+  transform: scale(1.02);
+  background-color: var(--light-green);
+  color: var(--white);
+  border-color: var(--light-green);
+}
+
 @media (max-width: 1024px) {
   .mainfrontContainer {
     padding: 0 1rem;
-  }
-
-  .mainfrontDescription,
-  .mainfrontImageContainer {
-    width: 100%;
-  }
-
-  .titleDescription {
-    font-size: 3.5rem;
-    margin-bottom: 3rem;
-  }
-}
-
-@media (max-width: 965px) {
-  .mainfrontContainer {
-    flex-direction: column;
-    text-align: center;
+    gap: 2rem;
   }
 
   .mainfrontImage {
-    max-width: 80%;
+    max-height: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mainfrontContainer {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem 1rem;
+    min-height: auto;
   }
 
-  .titleDescription {
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
+  .mainfrontDescription {
+    order: 1;
+    padding: 1rem 0;
+  }
+
+  .mainfrontImageContainer {
+    order: 2;
+    padding: 1rem 0;
+  }
+
+  .mainfrontImage {
+    max-height: 400px;
+    max-width: 100%;
+  }
+
+  .subtitleDescription::before {
+    display: none;
   }
 
   .textDescription {
-    font-size: 1rem;
-    line-height: 1.4;
+    max-width: 100%;
+    margin: 0 auto;
   }
 
   .loginContainerDescription {
-    flex-direction: column;
-    align-items: center;
-    margin-top: 2rem;
-  }
-
-  .buttonDescription {
-    width: 70%;
-    padding: 0.8rem 1rem;
-    font-size: 1rem;
+    justify-content: center;
   }
 }
 
 @media (max-width: 480px) {
   .mainfrontContainer {
-    padding: 0 0.5rem;
+    padding: 1rem 0.5rem;
   }
 
   .titleDescription {
@@ -164,12 +174,12 @@
     margin-bottom: 1rem;
   }
 
-  .textDescription {
-    font-size: 0.9rem;
-  }
-
   .buttonDescription {
     width: 100%;
-    padding: 0.6rem 0.8rem;
+    padding: 0.8rem;
+  }
+
+  .mainfrontImage {
+    max-height: 300px;
   }
 }

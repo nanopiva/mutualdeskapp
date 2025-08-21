@@ -1,84 +1,63 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+
+import { UserX, UserCheck, User } from "lucide-react";
 import styles from "./FriendCard.module.css";
-import AvatarIcon from "../AvatarIcon/AvatarIcon";
 
 interface FriendCardProps {
-  firstName: string;
-  lastName: string;
-  email: string;
-  profilePicture: string;
-  created_at: Date;
-  friend_since: Date;
-  id: string;
-  onDelete: (friendId: string) => void;
+  friend: {
+    user_id: string;
+    email: string;
+    first_name: string | null;
+    last_name: string | null;
+    created_at: string;
+  };
+  status: "friend" | "sent" | "received";
+  onAccept?: () => void;
+  onRemove: () => void;
 }
 
 export default function FriendCard({
-  firstName,
-  lastName,
-  email,
-  profilePicture,
-  created_at,
-  friend_since,
-  id,
-  onDelete,
+  friend,
+  status,
+  onAccept,
+  onRemove,
 }: FriendCardProps) {
-  const [showMenu, setShowMenu] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  const toggleMenu = () => setShowMenu((prev) => !prev);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const formattedCreatedDate = new Date(created_at).toLocaleDateString();
-  const formattedFriendSinceDate = new Date(friend_since).toLocaleDateString();
-
   return (
     <div className={styles.card}>
-      <div className={styles.menuContainer} ref={menuRef}>
-        <button className={styles.menuButton} onClick={toggleMenu}>
-          ⋮
-        </button>
-        {showMenu && (
-          <div className={styles.menu}>
-            <button onClick={() => onDelete(id)}>Delete friend</button>
-          </div>
-        )}
-      </div>
-
-      <AvatarIcon
-        pictureURL={profilePicture}
-        firstLetterBackup={firstName.charAt(0)}
-        secondLetterBackup={lastName.charAt(0)}
-        size={70}
-      />
-
-      <div className={styles.details}>
+      <div className={styles.userInfo}>
+        <div className={styles.avatar}>
+          {friend.first_name?.[0] || friend.email[0].toUpperCase()}
+        </div>
         <div>
           <h3 className={styles.name}>
-            {firstName} {lastName}
+            {friend.first_name} {friend.last_name}
           </h3>
-          <p className={styles.email}>{email}</p>
+          <p className={styles.email}>{friend.email}</p>
+          {status === "friend" && (
+            <p className={styles.friendsSince}>
+              Friends since {new Date(friend.created_at).toLocaleDateString()}
+            </p>
+          )}
         </div>
-        <div className={styles.memberSinceContainer}>
-          <p className={styles.memberSince}>
-            Member since:{" "}
-            <span className={styles.date}>{formattedCreatedDate}</span>
-          </p>
-          <p className={styles.memberSince}>
-            Friends since:{" "}
-            <span className={styles.date}>{formattedFriendSinceDate}</span>
-          </p>
-        </div>
+      </div>
+
+      <div className={styles.actions}>
+        {status === "received" && onAccept && (
+          <button
+            onClick={onAccept}
+            className={styles.acceptButton}
+            title="Accept friend request"
+          >
+            <UserCheck size={16} />
+          </button>
+        )}
+        <button
+          onClick={onRemove}
+          className={styles.removeButton}
+          title={status === "friend" ? "Remove friend" : "Cancel request"}
+        >
+          <UserX size={16} />
+        </button>
       </div>
     </div>
   );

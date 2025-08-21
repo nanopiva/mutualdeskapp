@@ -1,0 +1,145 @@
+.card {
+  background-color: var(--white);
+  border-radius: 10px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: rgba(36, 130, 50, 0.2);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.groupIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgba(36, 130, 50, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--strong-green);
+  flex-shrink: 0;
+}
+
+.groupInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.groupName {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--black);
+  line-height: 1.3;
+}
+
+.roleBadge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--white);
+}
+
+.groupDescription {
+  margin: 0 0 1.5rem 0;
+  color: var(--gray);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.groupMeta {
+  margin-top: auto;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--gray);
+}
+
+.cardActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.viewButton {
+  padding: 0.6rem 1.25rem;
+  background-color: var(--strong-green);
+  color: var(--white);
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.viewButton:hover {
+  background-color: var(--light-green);
+}
+
+.settingsButton {
+  padding: 0.6rem;
+  border-radius: 6px;
+  color: var(--gray);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settingsButton:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--black);
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 1.25rem;
+  }
+
+  .cardHeader {
+    gap: 0.75rem;
+  }
+
+  .groupIcon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .groupName {
+    font-size: 1.1rem;
+  }
+
+  .viewButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+}

@@ -1,330 +1,263 @@
 "use client";
-
 import { useState, useEffect } from "react";
-import { createProject } from "@/app/actions";
+import { useRouter, useSearchParams } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
+import Link from "next/link";
 import styles from "./page.module.css";
-import { getUserGroups } from "@/app/actions";
-import { useRouter } from "next/navigation";
-import { getActualUserId, getUserById } from "@/app/actions";
 
-type GroupData = {
-  id: string;
-  name: string;
-};
-
-export default function ProjectForm() {
-  const [projectName, setProjectName] = useState("");
-  const [projectDescription, setProjectDescription] = useState("");
-  const [isPublic, setIsPublic] = useState<boolean>(true);
-  const [myGroups, setMyGroups] = useState<GroupData[]>([]);
-  const [selectedGroup, setSelectedGroup] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
-  const [groupMembers, setGroupMembers] = useState<
-    { user_id: string; role: string }[]
-  >([]);
-  const [detailedMembers, setDetailedMembers] = useState<
-    { user_id: string; display: string }[]
-  >([]);
-  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  const [currentUserId, setCurrentUserId] = useState<string | null | undefined>(
-    null
-  );
-  const [loadingGroups, setLoadingGroups] = useState(true);
-  const [loadingMembers, setLoadingMembers] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export default function NewProjectPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [projectName, setProjectName] = useState("");
+  const [description, setDescription] = useState("");
+  const [isPublic, setIsPublic] = useState(false);
+  const [groupOption, setGroupOption] = useState<"personal" | "group">(
+    "personal"
+  );
+  const [selectedGroup, setSelectedGroup] = useState("");
+  const [availableGroups, setAvailableGroups] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const supabase = createClient();
+
+  const urlGroupId = searchParams.get("groupId");
 
   useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        setLoadingGroups(true);
-        const groups = await getUserGroups();
-        setMyGroups(groups);
-      } catch (error) {
-        console.error("Error fetching groups:", error);
-        setError("Failed to load groups. Please try again.");
-      } finally {
-        setLoadingGroups(false);
-      }
-    };
+    if (urlGroupId) {
+      setGroupOption("group");
+      fetchGroups().then(() => {
+        setSelectedGroup(urlGroupId);
+      });
+    }
+  }, [urlGroupId]);
 
-    fetchGroups();
-  }, []);
+  const fetchGroups = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
 
-  useEffect(() => {
-    const fetchGroupMembers = async () => {
-      if (!selectedGroup) {
-        setGroupMembers([]);
-        setDetailedMembers([]);
-        setSelectedMembers([]);
-        return;
-      }
+    const { data, error } = await supabase
+      .from("group_members")
+      .select("groups(id, name)")
+      .eq("user_id", user.id);
 
-      try {
-        setLoadingMembers(true);
-        const res = await fetch(`/api/group-members?groupId=${selectedGroup}`);
-        const data = await res.json();
+    if (error) {
+      console.error("Error fetching groups:", error);
+      return;
+    }
 
-        if (!currentUserId) return;
+    setAvailableGroups(data.map((item) => item.groups));
+  };
 
-        const filtered = data.filter((m: any) => m.user_id !== currentUserId);
-        setGroupMembers(filtered);
-        setSelectedMembers(filtered.map((m: any) => m.user_id));
-
-        const enriched = await Promise.all(
-          filtered.map(async (member: any) => {
-            try {
-              const info = await getUserById(member.user_id);
-              return {
-                user_id: member.user_id,
-                display: `${info.first_name} ${info.last_name} (${info.email})`,
-              };
-            } catch {
-              return {
-                user_id: member.user_id,
-                display: member.user_id,
-              };
-            }
-          })
-        );
-
-        setDetailedMembers(enriched);
-      } catch (error) {
-        console.error("Error fetching group members", error);
-        setError("Failed to load group members. Please try again.");
-      } finally {
-        setLoadingMembers(false);
-      }
-    };
-
-    fetchGroupMembers();
-  }, [selectedGroup, currentUserId]);
-
-  useEffect(() => {
-    const fetchMyId = async () => {
-      try {
-        const id = await getActualUserId();
-        setCurrentUserId(id);
-      } catch (error) {
-        console.error("Error fetching current user id:", error);
-      }
-    };
-
-    fetchMyId();
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
+    setLoading(true);
+    setError("");
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      setError("User not authenticated");
+      setLoading(false);
+      return;
+    }
 
     try {
-      const { success, projectId } = await createProject(
-        projectName,
-        projectDescription,
-        isPublic,
-        selectedGroup,
-        selectedMembers
-      );
-      if (success && projectId) {
-        router.push(`/dashboard/my-projects/${projectId}`);
-      } else {
-        setError("Error creating the project. Please try again.");
+      const projectData: any = {
+        name: projectName,
+        description: description || null,
+        is_public: isPublic,
+        author_id: user.id,
+      };
+
+      if (groupOption === "group" && selectedGroup) {
+        projectData.group_id = selectedGroup;
       }
-    } catch (error) {
-      console.error("Error creating project:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Error creating the project. Please try again."
-      );
+
+      const { data: createdProject, error: projectError } = await supabase
+        .from("projects")
+        .insert(projectData)
+        .select()
+        .single();
+
+      if (projectError || !createdProject) throw projectError;
+
+      if (groupOption === "group" && selectedGroup) {
+        const { data: groupMembers, error: groupError } = await supabase
+          .from("group_members")
+          .select("user_id")
+          .eq("group_id", selectedGroup);
+
+        if (groupError) throw groupError;
+
+        const membersToInsert = groupMembers
+          .filter((member) => member.user_id !== user.id)
+          .map((member) => ({
+            project_id: createdProject.id,
+            user_id: member.user_id,
+            group_id: selectedGroup,
+            role: "member",
+          }));
+
+        membersToInsert.push({
+          project_id: createdProject.id,
+          user_id: user.id,
+          group_id: selectedGroup,
+          role: "owner",
+        });
+
+        const { error: insertMembersError } = await supabase
+          .from("project_members")
+          .insert(membersToInsert);
+
+        if (insertMembersError) throw insertMembersError;
+      }
+
+      router.push(`/dashboard/my-projects/${createdProject.id}`);
+    } catch (err) {
+      console.error("Error creating project:", err);
+      setError("Failed to create project. Please try again.");
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
     <div className={styles.container}>
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Create New Project</h2>
-        {error && <div className={styles.errorMessage}>{error}</div>}
+      <div className={styles.header}>
+        <h1 className={styles.title}>Create New Project</h1>
+        <Link href="/dashboard/my-projects" className={styles.backLink}>
+          Back to My Projects
+        </Link>
+      </div>
 
+      <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGroup}>
           <label htmlFor="projectName" className={styles.label}>
-            Project Name
+            Project Name*
           </label>
           <input
             id="projectName"
-            name="projectName"
             type="text"
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
             className={styles.input}
-            placeholder="My Awesome Project"
             required
-            minLength={3}
             maxLength={100}
+            disabled={loading}
           />
-          <div className={styles.characterCount}>{projectName.length}/100</div>
         </div>
 
         <div className={styles.formGroup}>
-          <label htmlFor="projectDescription" className={styles.label}>
-            Project Description{" "}
-            <span className={styles.optional}>(optional)</span>
+          <label htmlFor="description" className={styles.label}>
+            Description
           </label>
           <textarea
-            id="projectDescription"
-            name="projectDescription"
-            value={projectDescription}
-            onChange={(e) => setProjectDescription(e.target.value)}
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             className={styles.textarea}
-            placeholder="Describe your project..."
+            rows={3}
             maxLength={500}
+            disabled={loading}
           />
-          <div className={styles.characterCount}>
-            {projectDescription.length}/500
-          </div>
         </div>
 
         <div className={styles.formGroup}>
-          <fieldset className={styles.fieldset}>
-            <legend className={styles.legend}>Project Visibility</legend>
-            <div className={styles.radioGroup}>
-              <label className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  name="projectType"
-                  checked={isPublic}
-                  onChange={() => setIsPublic(true)}
-                  className={styles.radioInput}
-                />
-                <span className={styles.radioCustom}></span>
-                <div className={styles.radioText}>
-                  <span className={styles.radioTitle}>Public</span>
-                  <span className={styles.radioDescription}>
-                    Anyone can view this project
-                  </span>
-                </div>
+          <label className={styles.label}>Project Type</label>
+          <div className={styles.radioGroup}>
+            <label className={styles.radioLabel}>
+              <input
+                type="radio"
+                name="projectType"
+                checked={groupOption === "personal"}
+                onChange={() => setGroupOption("personal")}
+                className={styles.radioInput}
+                disabled={loading}
+              />
+              <span>Personal Project</span>
+            </label>
+            <label className={styles.radioLabel}>
+              <input
+                type="radio"
+                name="projectType"
+                checked={groupOption === "group"}
+                onChange={() => {
+                  setGroupOption("group");
+                  fetchGroups();
+                }}
+                className={styles.radioInput}
+                disabled={loading}
+              />
+              <span>Group Project</span>
+            </label>
+          </div>
+
+          {groupOption === "group" && (
+            <div className={styles.selectGroup}>
+              <label htmlFor="groupSelect" className={styles.label}>
+                Select Group*
               </label>
-              <label className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  name="projectType"
-                  checked={!isPublic}
-                  onChange={() => setIsPublic(false)}
-                  className={styles.radioInput}
-                />
-                <span className={styles.radioCustom}></span>
-                <div className={styles.radioText}>
-                  <span className={styles.radioTitle}>Private</span>
-                  <span className={styles.radioDescription}>
-                    Only invited members can view
-                  </span>
-                </div>
-              </label>
+              <select
+                id="groupSelect"
+                value={selectedGroup}
+                onChange={(e) => setSelectedGroup(e.target.value)}
+                className={styles.select}
+                required
+                disabled={loading}
+              >
+                <option value="">Select a group</option>
+                {availableGroups.map((group) => (
+                  <option key={group.id} value={group.id}>
+                    {group.name}
+                  </option>
+                ))}
+              </select>
             </div>
-          </fieldset>
+          )}
         </div>
 
         <div className={styles.formGroup}>
-          <label htmlFor="group" className={styles.label}>
-            Associate with a Group{" "}
-            <span className={styles.optional}>(optional)</span>
+          <label className={styles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+              className={styles.checkboxInput}
+              disabled={loading}
+            />
+            <span>Make this project public</span>
           </label>
-          {loadingGroups ? (
-            <div className={styles.loading}>Loading your groups...</div>
-          ) : (
-            <select
-              id="group"
-              name="group"
-              value={selectedGroup}
-              onChange={(e) => setSelectedGroup(e.target.value)}
-              className={styles.select}
-            >
-              <option value="">Select a group...</option>
-              {myGroups.map((group) => (
-                <option key={group.id} value={group.id}>
-                  {group.name}
-                </option>
-              ))}
-            </select>
-          )}
+          <p className={styles.hint}>
+            Public projects can be viewed by anyone, but only collaborators can
+            edit.
+          </p>
         </div>
 
-        {selectedGroup && (
-          <div className={styles.formGroup}>
-            <fieldset className={styles.fieldset}>
-              <legend className={styles.legend}>Invite Group Members</legend>
-              {loadingMembers ? (
-                <div className={styles.loading}>Loading group members...</div>
-              ) : detailedMembers.length > 0 ? (
-                <>
-                  <div className={styles.memberSelectionHeader}>
-                    <div className={styles.checkboxLabel}>
-                      <input
-                        type="checkbox"
-                        checked={
-                          selectedMembers.length === detailedMembers.length
-                        }
-                        onChange={(e) => {
-                          setSelectedMembers(
-                            e.target.checked
-                              ? detailedMembers.map((m) => m.user_id)
-                              : []
-                          );
-                        }}
-                        className={styles.checkboxInput}
-                      />
-                      <span>Select All</span>
-                    </div>
-                  </div>
-                  <div className={styles.memberList}>
-                    {detailedMembers.map((member) => (
-                      <label key={member.user_id} className={styles.memberItem}>
-                        <input
-                          type="checkbox"
-                          checked={selectedMembers.includes(member.user_id)}
-                          onChange={(e) => {
-                            const updated = e.target.checked
-                              ? [...selectedMembers, member.user_id]
-                              : selectedMembers.filter(
-                                  (id) => id !== member.user_id
-                                );
-                            setSelectedMembers(updated);
-                          }}
-                          className={styles.checkboxInput}
-                        />
-                        <span className={styles.memberName}>
-                          {member.display.split(" (")[0]}
-                        </span>
-                        <span className={styles.memberEmail}>
-                          {member.display.match(/\((.*?)\)/)?.[1]}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className={styles.infoMessage}>
-                  No other members in this group to invite.
-                </div>
-              )}
-            </fieldset>
-          </div>
-        )}
+        {error && <div className={styles.error}>{error}</div>}
 
-        <button
-          type="submit"
-          className={styles.submitButton}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <span className={styles.buttonLoader}></span>
-          ) : (
-            "Create Project"
-          )}
-        </button>
+        <div className={styles.formActions}>
+          <button
+            type="submit"
+            className={styles.submitButton}
+            disabled={loading}
+            aria-label={
+              loading ? "Creating project, please wait..." : "Create Project"
+            }
+          >
+            {loading ? (
+              <div className={styles.buttonLoader}>
+                <div className="loader" aria-hidden="true"></div>
+                <span>Creating Project...</span>
+              </div>
+            ) : (
+              "Create Project"
+            )}
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -1,25 +1,23 @@
-/* Contenedor principal del Header */
 .headerNav {
   display: flex;
-  flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem; /* Margen interno para espacio */
+  padding: 1rem 2rem;
   background-color: #f2f9f2;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra ligera */
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* Línea separadora */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   width: 100%;
   min-width: 100vw;
+  position: relative;
 }
 
-/* Contenedor del logo */
 .headerNavbarLogoContainer {
   display: flex;
   align-items: center;
-  gap: 1rem; /* Espaciado entre elementos */
+  gap: 1rem;
+  flex: 1;
 }
 
-/* Logo */
 .headerNavbarLogo {
   transition:
     transform 0.3s ease-in-out,
@@ -46,40 +44,201 @@
   }
 }
 
-/* Título del Header */
 .headerTitle {
   font-size: 42px;
-  color: #1a202c; /* Tono oscuro moderno */
-  text-transform: uppercase; /* Mayúsculas para destacar */
-  letter-spacing: 2px; /* Espaciado entre letras */
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Sutil sombra */
+  color: #1a202c;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
   transition: color 0.3s ease-in-out;
+  text-align: center;
+  flex: 1;
 }
 
 .headerTitle:hover {
-  color: #248232; /* Color destacado al hover */
+  color: #248232;
   cursor: pointer;
 }
 
 .menuButton {
-  display: none; /* Oculto por defecto en desktop */
+  display: none;
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
-  margin-right: 1rem;
+}
+
+.avatarContainer {
+  display: flex;
+  justify-content: flex-end;
+  flex: 1;
+  position: relative;
+}
+
+.avatarButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.avatarButton:hover {
+  transform: scale(1.05);
+}
+
+.avatarButton:focus {
+  outline: 2px solid #248232;
+  outline-offset: 2px;
+}
+
+.menuBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 998;
+  background: transparent;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: #fcfffc;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 999;
+  animation: slideIn 0.2s ease-out;
+  overflow: hidden;
+  border: 1px solid rgba(4, 15, 15, 0.1);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menuHeader {
+  padding: 12px 16px;
+  background-color: #f8faf8;
+  border-bottom: 1px solid rgba(4, 15, 15, 0.1);
+}
+
+.menuTitle {
+  font-weight: 600;
+  color: #040f0f;
+  font-size: 0.9rem;
+}
+
+.menuSeparator {
+  height: 1px;
+  background-color: rgba(4, 15, 15, 0.1);
+  margin: 4px 0;
+}
+
+.menuItem {
+  padding: 12px 16px;
+  color: #040f0f;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.menuItem:hover {
+  background-color: #f2f9f2;
+  color: #248232;
+}
+
+.menuItem.disabled {
+  color: #2d3a3a;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.menuItem.disabled:hover {
+  background-color: #fcfffc;
+  color: #2d3a3a;
+}
+
+.tooltip {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 8px;
+  background-color: #040f0f;
+  color: #fcfffc;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.menuItem.disabled:hover .tooltip {
+  opacity: 1;
 }
 
 @media (max-width: 768px) {
   .menuButton {
-    display: block; /* Visible en mobile */
+    display: block;
   }
 
   .headerNavbarLogo {
-    display: none; /* Oculta el logo en mobile */
+    display: none;
   }
 
   .headerTitle {
-    font-size: 24px; /* Reduce el tamaño del título en mobile */
+    font-size: 24px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: 40%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .headerNavbarLogoContainer {
+    flex: 0 0 auto;
+  }
+
+  .avatarContainer {
+    flex: 0 0 auto;
+  }
+
+  .dropdownMenu {
+    right: -10px;
+  }
+}
+
+@media (max-width: 486px) {
+  .headerTitle {
+    display: none;
+  }
+
+  .dropdownMenu {
+    position: fixed;
+    top: unset;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    width: auto;
   }
 }

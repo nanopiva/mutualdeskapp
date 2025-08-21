@@ -1,121 +1,87 @@
 .card {
+  background-color: var(--white);
+  border-radius: 8px;
+  padding: 16px;
   display: flex;
   align-items: center;
-  background-color: #ffffff;
-  border: 1px solid #ccc; /* Borde gris */
-  border-radius: 8px;
-  padding: 1rem;
-  max-width: 90%; /* Reduce el ancho máximo de la tarjeta */
-  margin: 0 auto; /* Centra la tarjeta horizontalmente */
-  box-sizing: border-box;
-
-  position: relative; /* Necesario para posicionar el menú */
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
 }
 
-.details {
-  margin-left: 1rem;
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   flex: 1;
-  overflow: hidden; /* Prevenir desbordamiento de contenido */
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--light-green);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
 }
 
 .name {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #333;
-  margin: 0;
-  overflow: hidden; /* Cortar texto si es demasiado largo */
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  margin: 0 0 4px 0;
+  color: var(--black);
+  font-size: 1rem;
 }
 
 .email {
-  font-size: 0.9rem;
-  color: #555;
-  margin: 0.25rem 0;
-  overflow: hidden; /* Cortar texto si es demasiado largo */
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  margin: 0;
+  color: var(--gray);
+  font-size: 0.875rem;
 }
 
-.role {
-  font-size: 0.9rem;
-  color: #777;
-  margin: 0.25rem 0;
-  overflow: hidden; /* Cortar texto si es demasiado largo */
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.friendsSince {
+  margin: 4px 0 0 0;
+  color: var(--gray);
+  font-size: 0.75rem;
+  font-style: italic;
 }
 
-.memberSinceContainer {
-  margin-top: 0.5rem;
+.actions {
+  display: flex;
+  gap: 8px;
 }
 
-.memberSince {
-  font-size: 0.8rem;
-  color: #666;
-  word-wrap: break-word; /* Ajustar texto largo */
-}
-
-.date {
-  font-weight: bold;
-}
-
-/* Menú desplegable */
-.menuContainer {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  left: auto;
-}
-
-.menuButton {
+.acceptButton,
+.removeButton {
   background: none;
   border: none;
-  font-size: 18px;
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.menu {
-  position: absolute;
-  top: 25px;
-  left: 0;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-  z-index: 10;
-  min-width: 120px;
+.acceptButton {
+  color: var(--strong-green);
 }
 
-.menu button {
-  display: block;
-  width: 100%;
-  padding: 8px 12px;
-  border: none;
-  background: none;
-  text-align: left;
-  cursor: pointer;
-  font-size: 0.9rem;
+.acceptButton:hover {
+  background-color: rgba(43, 168, 74, 0.1);
 }
 
-.menu button:hover {
-  background: #f0f0f0;
+.removeButton {
+  color: #e74c3c;
 }
 
-/* Responsivo */
-@media (max-width: 400px) {
-  .details {
-    margin-left: 0.5rem;
-  }
-
-  .name {
-    font-size: 1rem;
-  }
-
-  .email,
-  .role,
-  .memberSince {
-    font-size: 0.8rem;
-  }
+.removeButton:hover {
+  background-color: rgba(231, 76, 60, 0.1);
 }

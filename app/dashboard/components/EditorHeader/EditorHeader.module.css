@@ -1,0 +1,42 @@
+.editorLayout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.editorHeader {
+  height: 40px;
+  background-color: #fafbfd;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(45, 58, 58, 0.1);
+  z-index: 50;
+}
+
+.editorContent {
+  flex: 1;
+  overflow: auto;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gray);
+  font-size: 14px;
+}
+
+.backButton:hover {
+  background-color: rgba(36, 130, 50, 0.1);
+}
+
+.backText {
+  color: var(--gray);
+}

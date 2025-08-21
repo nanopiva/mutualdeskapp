@@ -1,3 +1,71 @@
-.mainContentContainer {
-  width: 100%;
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--background);
+  print-color-adjust: exact;
+}
+
+.print\:hidden {
+  @media print {
+    display: none;
+  }
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.pt-1 {
+  padding-top: 0.25rem;
+}
+
+.pb-1 {
+  padding-bottom: 0.25rem;
+}
+
+.pb-2 {
+  padding-bottom: 0.5rem;
+}
+
+.border-b {
+  border-bottom-width: 1px;
+}
+
+.border-\[var\(--gray\)\] {
+  border-color: var(--gray);
+}
+
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+.pb-4 {
+  padding-bottom: 1rem;
+}
+
+.print\:pt-0 {
+  @media print {
+    padding-top: 0;
+  }
+}
+
+.bg-\[var\(--white\)\] {
+  background-color: var(--white);
+}
+
+.bg-gradient-to-br {
+  background-image: linear-gradient(to bottom right, var(--white), #f0f4f8);
+}
+
+@media (max-width: 768px) {
+  .px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .sticky {
+    position: relative;
+  }
 }

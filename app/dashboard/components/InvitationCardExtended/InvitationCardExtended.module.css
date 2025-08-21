@@ -1,0 +1,124 @@
+.card {
+  background-color: var(--white);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.invitationType {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: var(--black);
+}
+
+.invitationName {
+  font-size: 0.875rem;
+  color: var(--gray);
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.userIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--light-green);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userName {
+  margin: 0;
+  font-weight: 500;
+  color: var(--black);
+}
+
+.userEmail {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--gray);
+}
+
+.roleInfo {
+  display: flex;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: var(--gray);
+}
+
+.roleInfo strong {
+  color: var(--black);
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.invitationDate {
+  font-size: 0.75rem;
+  color: var(--gray);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.acceptButton,
+.rejectButton,
+.cancelButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.acceptButton {
+  color: var(--strong-green);
+}
+
+.acceptButton:hover {
+  background-color: rgba(43, 168, 74, 0.1);
+}
+
+.rejectButton,
+.cancelButton {
+  color: #e74c3c;
+}
+
+.rejectButton:hover,
+.cancelButton:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+}

@@ -8,16 +8,7 @@ import { Bungee_Inline } from "next/font/google";
 import { createClient } from "@/utils/supabase/client";
 import { useState, useEffect } from "react";
 import AvatarIcon from "../AvatarIcon/AvatarIcon";
-import { Menu } from "lucide-react"; // Importa el icono de hamburguesa
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Menu } from "lucide-react";
 
 const bungee = Bungee_Inline({
   subsets: ["latin"],
@@ -33,23 +24,41 @@ export default function Header({
   const [user, setUser] = useState<any>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [profilePictureURL, setProfilePictureURL] = useState("");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+
       if (user) {
         setUser(user);
-        const { data, error } = await supabase
+
+        const { data: profileData } = await supabase
           .from("users")
           .select("first_name, last_name")
           .eq("id", user.id)
           .single();
 
-        if (data) {
-          setFirstName(data.first_name || "");
-          setLastName(data.last_name || "");
+        if (profileData) {
+          setFirstName(profileData.first_name || "");
+          setLastName(profileData.last_name || "");
+        }
+
+        const { data: files, error } = await supabase.storage
+          .from("profilepictures")
+          .list(user.id);
+
+        if (error) {
+          console.error("Error listing profile pictures:", error);
+        } else if (files && files.length > 0) {
+          const profileFile = files.find((f) => f.name.startsWith("profile."));
+          if (profileFile) {
+            const url = `https://kckpcncvhqcxfvzinkto.supabase.co/storage/v1/object/public/profilepictures/${user.id}/${profileFile.name}?t=${Date.now()}`;
+            setProfilePictureURL(url);
+          }
         }
       }
     };
@@ -57,9 +66,13 @@ export default function Header({
     fetchUserData();
   }, []);
 
-  const profilePictureURL = user
-    ? `https://kckpcncvhqcxfvzinkto.supabase.co/storage/v1/object/public/profilepictures/${user.id}/profile.jpg`
-    : "";
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
 
   return (
     <nav className={styles.headerNav}>
@@ -71,7 +84,7 @@ export default function Header({
           <Image
             className={styles.headerNavbarLogo}
             src={logo}
-            alt="Logo de la aplicación"
+            alt="App logo"
             width={90}
             height={55}
           />
@@ -83,26 +96,48 @@ export default function Header({
       >
         MutualDesk
       </Link>
-      <DropdownMenu>
-        <DropdownMenuTrigger>
+      <div className={styles.avatarContainer}>
+        <button
+          className={styles.avatarButton}
+          onClick={toggleMenu}
+          aria-expanded={isMenuOpen}
+          aria-label="User menu"
+        >
           <AvatarIcon
             pictureURL={profilePictureURL}
             firstLetterBackup={firstName.charAt(0)}
             secondLetterBackup={lastName.charAt(0)}
             size={60}
           />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <Link href="/dashboard/profile">
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-          </Link>
-          <DropdownMenuItem>Billing</DropdownMenuItem>
-          <DropdownMenuItem>Team</DropdownMenuItem>
-          <DropdownMenuItem>Subscription</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </button>
+
+        {isMenuOpen && (
+          <>
+            <div className={styles.menuBackdrop} onClick={closeMenu}></div>
+            <div className={styles.dropdownMenu}>
+              <div className={styles.menuHeader}>
+                <span className={styles.menuTitle}>My Account</span>
+              </div>
+              <div className={styles.menuSeparator}></div>
+              <Link href="/dashboard/profile" onClick={closeMenu}>
+                <div className={styles.menuItem}>Profile</div>
+              </Link>
+              <div className={`${styles.menuItem} ${styles.disabled}`}>
+                Billing
+                <div className={styles.tooltip}>Not available yet</div>
+              </div>
+              <div className={`${styles.menuItem} ${styles.disabled}`}>
+                Team
+                <div className={styles.tooltip}>Not available yet</div>
+              </div>
+              <div className={`${styles.menuItem} ${styles.disabled}`}>
+                Subscription
+                <div className={styles.tooltip}>Not available yet</div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
     </nav>
   );
 }

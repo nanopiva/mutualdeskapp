@@ -23,3 +23,216 @@
 html {
   background-color: var(--white);
 }
+
+.loader {
+  width: 50px;
+  padding: 8px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--strong-green);
+  --_m: conic-gradient(#0000 10%, #000), linear-gradient(#000 0 0) content-box;
+  -webkit-mask: var(--_m);
+  mask: var(--_m);
+  -webkit-mask-composite: source-out;
+  mask-composite: subtract;
+  animation: l3 1s infinite linear;
+}
+@keyframes l3 {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.floating-threads {
+  display: none;
+}
+.anchored-threads {
+  display: block;
+  max-width: 300px;
+  width: 100%;
+  position: absolute;
+  right: 12px;
+}
+@media (max-width: 640px) {
+  .floating-threads {
+    display: block;
+  }
+  .anchored-threads {
+    display: none;
+  }
+}
+
+.tiptap {
+  a {
+    color: var(--link-color);
+    cursor: pointer;
+  }
+  a:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  img {
+    display: block;
+    height: auto;
+    margin: 1.5rem 0;
+    max-width: 100%;
+  }
+  img.ProseMirror-selectednode {
+    outline: 3px solid var(--strong-green);
+  }
+
+  table {
+    border-collapse: collapse;
+    margin: 0;
+    overflow: hidden;
+    table-layout: fixed;
+    width: 100%;
+  }
+  table td,
+  table th {
+    border: 1px solid var(--input-border);
+    box-sizing: border-box;
+    min-width: 1em;
+    padding: 6px 8px;
+    position: relative;
+    vertical-align: top;
+  }
+  table th {
+    background-color: color-mix(in srgb, var(--gray) 8%, var(--white));
+    color: var(--black);
+    font-weight: 600;
+    text-align: left;
+  }
+  table .selectedCell:after {
+    background: var(--gray);
+    opacity: 0.2;
+    content: "";
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 2;
+  }
+  table .column-resize-handle {
+    background-color: var(--strong-green);
+    bottom: -2px;
+    pointer-events: none;
+    position: absolute;
+    right: -2px;
+    top: 0;
+    width: 4px;
+  }
+
+  .tableWrapper {
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+  &.resize-cursor {
+    cursor: col-resize;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    line-height: 1.1;
+    margin-top: 2.5rem;
+    color: var(--black);
+    text-wrap: pretty;
+  }
+  h1,
+  h2 {
+    margin-top: 3.5rem;
+    margin-bottom: 1.5rem;
+  }
+  h1 {
+    font-size: 1.4rem;
+  }
+  h2 {
+    font-size: 1.2rem;
+  }
+  h3 {
+    font-size: 1.1rem;
+  }
+  h4,
+  h5,
+  h6 {
+    font-size: 1rem;
+  }
+
+  ul:not([data-type="taskList"]) {
+    list-style: disc outside;
+    padding-left: 1.25rem;
+    margin: 0.75rem 0;
+  }
+  ol {
+    list-style: decimal outside;
+    padding-left: 1.25rem;
+    margin: 0.75rem 0;
+  }
+  li {
+    color: var(--black);
+    margin: 0.125rem 0;
+  }
+  ul li p,
+  ol li p {
+    margin: 0.25em 0;
+  }
+
+  ul:not([data-type="taskList"]) > li::marker {
+    content: "•  ";
+    color: var(--black);
+  }
+  ol > li::marker {
+    content: counter(list-item) ". ";
+    color: var(--black);
+  }
+
+  ul[data-type="taskList"] {
+    list-style: none;
+    margin-left: 0;
+    padding: 0;
+  }
+  ul[data-type="taskList"] li {
+    display: flex;
+    align-items: flex-start;
+  }
+  ul[data-type="taskList"] li > label {
+    margin-right: 0.5rem;
+    user-select: none;
+  }
+  ul[data-type="taskList"] li > div {
+    flex: 1 1 auto;
+  }
+  ul[data-type="taskList"] input[type="checkbox"] {
+    cursor: pointer;
+    accent-color: var(--strong-green);
+  }
+  ul[data-type="taskList"] ul[data-type="taskList"] {
+    margin: 0;
+  }
+}
+
+div[data-radix-popper-content-wrapper] {
+  z-index: 50 !important;
+}
+
+.ProseMirror,
+.ProseMirror:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.h-full.outline-none:focus,
+.h-full.outline-none {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.ProseMirror {
+  min-height: 100%;
+}

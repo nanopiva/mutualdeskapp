@@ -1,46 +1,58 @@
 import styles from "./featuresnow.module.css";
 import GridItemFeatures from "../GridItemFeatures/griditemfeatures";
-import EditIcon from "../../../public/EditIcon.svg";
-import ChatIcon from "../../../public/ChatIcon.svg";
-import ShareIcon from "../../../public/ShareIcon.svg";
-import SaveIcon from "../../../public/SaveIcon.svg";
+import {
+  Users,
+  MessageSquare,
+  Share2,
+  Cloud,
+  Lock,
+  Tag,
+  Bell,
+  GitBranch,
+} from "lucide-react";
 
 export default function FeaturesNow() {
   return (
-    <div className={styles.featuresNowContainer}>
-      <h3 className={styles.featuresNowTitle}>
-        What are the current features we offer?
-      </h3>
-      <div className={styles.featuresNowGridContainer}>
-        <GridItemFeatures
-          image={EditIcon}
-          alt="Edit icon"
-          title="Live edition"
-          description="You can edit your documents simultaneously with members of your group"
-          imageSize={100}
-        />
-        <GridItemFeatures
-          image={ChatIcon}
-          alt="Chat icon"
-          title="Chat"
-          description="A chat is provided to communicate with any member of the group"
-          imageSize={100}
-        />
-        <GridItemFeatures
-          image={ShareIcon}
-          alt="Share icon"
-          title="Share your work easily"
-          description="You can invite any person to edit or watch your work only sending them a link"
-          imageSize={100}
-        />
-        <GridItemFeatures
-          image={SaveIcon}
-          alt="Save icon"
-          title="Cloud save"
-          description="Save your work in the cloud to not loss any progress made"
-          imageSize={100}
-        />
+    <section className={styles.featuresNowSection}>
+      <div className={styles.featuresNowContainer}>
+        <h2 className={styles.sectionTitle}>Current Features</h2>
+        <p className={styles.sectionSubtitle}>
+          Everything you need for seamless collaboration
+        </p>
+
+        <div className={styles.featuresNowGridContainer}>
+          <GridItemFeatures
+            icon={<Users size={48} />}
+            title="Real-time Collaboration"
+            description="Work simultaneously with your team on documents with instant updates"
+          />
+          <GridItemFeatures
+            icon={<Lock size={48} />}
+            title="Project Privacy"
+            description="Create private workspaces or public projects with customizable permissions"
+          />
+          <GridItemFeatures
+            icon={<MessageSquare size={48} />}
+            title="Integrated Chat"
+            description="Communicate with your team without leaving the editor"
+          />
+          <GridItemFeatures
+            icon={<Share2 size={48} />}
+            title="Easy Sharing"
+            description="Invite collaborators with shareable links and set access levels"
+          />
+          <GridItemFeatures
+            icon={<Cloud size={48} />}
+            title="Cloud Storage"
+            description="Automatic saves ensure you never lose your work"
+          />
+          <GridItemFeatures
+            icon={<Tag size={48} />}
+            title="Mention System"
+            description="Tag team members in comments to get their attention"
+          />
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

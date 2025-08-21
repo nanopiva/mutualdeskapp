@@ -1,9 +1,7 @@
 import styles from "./page.module.css";
-import Header from "../components/Header/header";
 import IntroFrontPages from "../components/IntroFrontPages/intro";
 import AboutItem from "../components/AboutItem/aboutitem";
-import AboutLogo from "../../public/About.svg";
-import PrinciplesLogo from "../../public/PrinciplesLogo.svg";
+import { Users, HeartHandshake } from "lucide-react";
 
 export default function About() {
   return (
@@ -15,8 +13,7 @@ export default function About() {
         />
 
         <AboutItem
-          image={AboutLogo}
-          alt="Team working logo"
+          icon={<Users size={120} color="#248232" />}
           title="Our Goals"
           description={
             <div>
@@ -38,8 +35,7 @@ export default function About() {
         />
 
         <AboutItem
-          image={PrinciplesLogo}
-          alt="Core values logo"
+          icon={<HeartHandshake size={120} color="#248232" />}
           title="Principles and Values"
           description={
             <div>

@@ -1,0 +1,73 @@
+.welcomeHeader {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.greeting {
+  font-size: 2rem;
+  color: var(--strong-green);
+  margin: 0 0 0.5rem 0;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+}
+
+.greetingSkeleton {
+  width: 220px;
+  height: 2rem;
+  background: linear-gradient(
+    90deg,
+    rgba(36, 130, 50, 0.1) 25%,
+    rgba(43, 168, 74, 0.2) 50%,
+    rgba(36, 130, 50, 0.1) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: loading 1.5s infinite;
+}
+
+.userName {
+  color: var(--black);
+  font-weight: 700;
+}
+
+.emoji {
+  margin-left: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--gray);
+  margin: 0;
+  line-height: 1.5;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .greeting {
+    font-size: 1.75rem;
+  }
+
+  .welcomeHeader {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .greeting {
+    font-size: 1.5rem;
+  }
+}

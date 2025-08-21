@@ -1,0 +1,237 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: var(--white);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  color: var(--black);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--gray);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  color: var(--black);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.searchContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.searchInput {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  transition: border-color 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.searchInput:focus-within {
+  border-color: var(--input-border-focus);
+}
+
+.searchInput input {
+  flex: 1;
+  border: none;
+  outline: none;
+  margin-left: 8px;
+  font-size: 0.875rem;
+  background: transparent;
+}
+
+.searchResults {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.userResult {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.userResult:hover {
+  border-color: var(--light-green);
+  background-color: rgba(43, 168, 74, 0.05);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--light-green);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.userEmail {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--black);
+  font-weight: 500;
+}
+
+.userName {
+  margin: 2px 0 0 0;
+  font-size: 0.75rem;
+  color: var(--gray);
+}
+
+.addButton {
+  background: none;
+  border: none;
+  color: var(--light-green);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.addButton:hover {
+  background-color: rgba(43, 168, 74, 0.1);
+}
+
+.noResults {
+  text-align: center;
+  padding: 20px;
+  color: var(--gray);
+}
+
+.noResults p {
+  margin: 0;
+}
+
+.noResults p:first-child {
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--gray);
+}
+
+.error {
+  text-align: center;
+  padding: 20px;
+  color: #e74c3c;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.cancelButton {
+  padding: 8px 16px;
+  border: 1px solid var(--gray);
+  border-radius: 4px;
+  background: none;
+  color: var(--gray);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background-color: rgba(45, 58, 58, 0.1);
+}
+
+.invitationStatus {
+  margin: 4px 0 0 0;
+  font-size: 0.75rem;
+  color: var(--gray);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pendingBadge {
+  font-size: 0.75rem;
+  color: #f39c12;
+  background-color: rgba(243, 156, 18, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.userResult {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+/* Ajustar el hover para que no sea clickeable cuando hay invitación pendiente */
+.userResult:not(.hasInvitation):hover {
+  border-color: var(--light-green);
+  background-color: rgba(43, 168, 74, 0.05);
+  cursor: pointer;
+}

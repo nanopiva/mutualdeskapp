@@ -1,97 +1,103 @@
-.invitationsContainer {
-  padding: 2rem;
-  border-radius: 8px;
-  width: 100%;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  min-height: 60vh;
+  position: relative;
 }
 
-.h2 {
-  font-size: 1.5rem;
-  color: var(--black);
-  border-bottom: 2px solid var(--light-green);
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.groupInvitationsContainer,
-.projectInvitationsContainer,
-.friendInvitationsContainer {
+.header {
   margin-bottom: 2rem;
 }
 
-.invitationDetail {
-  background-color: var(--white);
-  border: 1px solid var(--input-border);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 450px;
+.header h1 {
+  margin: 0;
+  color: var(--strong-green);
+  font-size: 2rem;
+  font-weight: 600;
 }
 
-.invitationDetail p {
-  margin: 0.5rem 0;
-  color: var(--gray);
-}
-
-.invitationDetail button {
-  background-color: var(--light-green);
-  color: var(--white);
-  border: none;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  margin-right: 0.5rem;
-  transition: background-color 0.3s ease;
-}
-
-.invitationDetail button:hover {
-  background-color: var(--strong-green);
-}
-
-.invitationDetail button:last-child {
-  background-color: var(--gray);
-}
-
-.invitationDetail button:last-child:hover {
-  background-color: var(--black);
-}
-
-.p {
-  font-size: 1rem;
-}
-
-.acceptDeclineButtons {
+.loaderContainer {
   display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 1.5rem;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  width: 100%;
 }
-@media (max-width: 600px) {
-  .invitationsContainer {
+
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: #e74c3c;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  margin: 1rem 0;
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+  color: var(--black);
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(36, 130, 50, 0.2);
+}
+
+.invitationsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.25rem;
+}
+
+.emptyState {
+  background-color: var(--white);
+  border-radius: 8px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: var(--gray);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .container {
     padding: 1rem;
   }
 
-  .h2 {
-    font-size: 1.2rem;
+  .header h1 {
+    font-size: 1.75rem;
   }
 
-  .invitationDetail button {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
+  .sectionTitle {
+    font-size: 1.125rem;
   }
 
-  .invitationDetail p {
-    font-size: 0.9rem;
+  .invitationsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .emptyState {
+    padding: 2rem 1rem;
   }
 }
 
-.responsiveInvitation {
-  padding: 10px;
-  box-sizing: border-box;
-}
+@media (max-width: 480px) {
+  .header h1 {
+    font-size: 1.5rem;
+  }
 
-@media (min-width: 280px) {
-  .responsiveInvitation {
-    margin: 5px 0;
+  .sectionTitle {
+    font-size: 1rem;
+  }
+
+  .emptyState {
+    padding: 1.5rem 1rem;
   }
 }

@@ -32,15 +32,16 @@ export default function Navbar() {
             <Image
               className={styles.headerNavbarLogo}
               src={logo}
-              alt="Logo de la aplicación"
+              alt="MultiDesk Logo"
               width={100}
-              height={75}
+              height={40}
+              priority
             />
           </Link>
         </div>
         <button
           className={`${styles.menuButton} ${menuOpen ? styles.menuButtonOpen : ""}`}
-          aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
           onClick={toggleMenu}
         >
@@ -53,22 +54,22 @@ export default function Navbar() {
           role="menu"
         >
           <li className={styles.headerNavbarOption} role="menuitem">
-            <Link href="/features" className={styles.navbara}>
+            <Link href="/features" className={styles.navLink}>
               Features
             </Link>
           </li>
           <li className={styles.headerNavbarOption} role="menuitem">
-            <Link href="/about" className={styles.navbara}>
+            <Link href="/about" className={styles.navLink}>
               About
             </Link>
           </li>
           <li className={styles.headerNavbarOption} role="menuitem">
-            <Link href="/contact" className={styles.navbara}>
+            <Link href="/contact" className={styles.navLink}>
               Contact
             </Link>
           </li>
-          <li className={styles.menuLoginButton} role="menuitem">
-            <Link href="/sign-in" className={styles.loginHeaderButton}>
+          <li className={styles.headerNavbarOption} role="menuitem">
+            <Link href="/sign-in" className={styles.loginButton}>
               Login
             </Link>
           </li>

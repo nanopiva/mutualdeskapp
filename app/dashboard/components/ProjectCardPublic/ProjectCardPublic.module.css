@@ -1,0 +1,141 @@
+.card {
+  position: relative;
+  background-color: var(--white);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.projectName {
+  margin: 0;
+  font-size: 1.125rem;
+  color: var(--black);
+  flex: 1;
+  line-height: 1.3;
+}
+
+.publicBadge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  margin-left: 0.5rem;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.projectDescription {
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+  color: var(--gray);
+  line-height: 1.4;
+}
+
+.projectSnippet {
+  margin: 0.75rem 0;
+  font-size: 0.8125rem;
+  color: var(--gray);
+  line-height: 1.4;
+  flex: 1;
+}
+
+.projectMeta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: var(--gray);
+}
+
+.author,
+.updated {
+  display: flex;
+  align-items: center;
+}
+
+.viewButton {
+  display: block;
+  text-align: center;
+  padding: 0.5rem;
+  margin-top: 1rem;
+  background-color: var(--strong-green);
+  color: var(--white);
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.viewButton:hover {
+  background-color: var(--light-green);
+}
+
+.preview {
+  position: absolute;
+  top: -180px;
+  right: 0;
+  width: 300px;
+  background-color: var(--white);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  padding: 1rem;
+}
+
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.previewHeader h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--black);
+}
+
+.previewHeader span {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.previewContent {
+  font-size: 0.8125rem;
+  color: var(--gray);
+  line-height: 1.4;
+  margin: 0.5rem 0;
+}
+
+.previewFooter {
+  font-size: 0.75rem;
+  color: var(--gray);
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .preview {
+    display: none;
+  }
+}

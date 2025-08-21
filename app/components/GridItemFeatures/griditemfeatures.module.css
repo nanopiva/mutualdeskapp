@@ -1,99 +1,81 @@
-.gridItemContainer {
+.gridItem {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 1.5rem;
+  padding: 2rem;
   background-color: var(--white);
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  border-radius: 12px;
+  border: 1px solid rgba(36, 130, 50, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  height: 100%;
 }
 
-.gridItemContainer:hover {
+.gridItem:hover {
   transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(36, 130, 50, 0.1);
+  border-color: rgba(36, 130, 50, 0.2);
+}
+
+.iconContainer {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(36, 130, 50, 0.1);
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  color: var(--strong-green);
+  position: relative;
 }
 
 .gridItemTitle {
-  font-size: 1.4rem;
-  margin: 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--black);
 }
 
 .gridItemDescription {
   font-size: 1rem;
   color: var(--gray);
+  line-height: 1.6;
+}
+
+.comingSoon {
+  opacity: 0.85;
+}
+
+.comingSoonBadge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: var(--light-green);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {
-  .gridItemContainer {
-    padding: 1rem;
+  .gridItem {
+    padding: 1.5rem;
   }
 
   .gridItemTitle {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
 
   .gridItemDescription {
     font-size: 0.9rem;
   }
-}
 
-.featuresNowGridItem {
-  display: flex;
-  padding: 1.5rem;
-  background: #fff;
-  box-shadow: var(--black);
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  width: 100%;
-  border-radius: 0.6rem;
-  color: var(--black);
-  font-size: 1rem;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-.featuresNowGridItemTitle {
-  font-weight: bold;
-  padding: 0.75rem 0;
-  color: var(--black);
-  font-size: 1.2rem;
-}
-
-.featuresNowGridItemDescription {
-  font-size: 0.9rem;
-}
-
-@media (min-width: 768px) {
-  .featuresNowGridItem {
-    padding: 2.5rem;
-    font-size: 1.6rem;
-  }
-
-  .featuresNowGridItemTitle {
-    padding: 1rem 0;
-    font-size: 1.4rem;
-  }
-
-  .featuresNowGridItemDescription {
-    font-size: 1.1rem;
-  }
-}
-
-@media (hover: hover) {
-  .featuresNowGridItem:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-  }
-}
-
-@media (hover: none) {
-  .featuresNowGridItem:active {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+  .iconContainer {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1rem;
   }
 }

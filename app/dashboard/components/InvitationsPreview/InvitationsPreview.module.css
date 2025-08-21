@@ -1,0 +1,191 @@
+.invitationsPreview {
+  background-color: var(--white);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2.5rem;
+  min-height: 250px;
+  position: relative;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.title {
+  color: var(--strong-green);
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.viewAll {
+  color: var(--light-green);
+  font-size: 0.875rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.viewAll:hover {
+  color: var(--strong-green);
+  text-decoration: underline;
+}
+
+.loaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px;
+  width: 100%;
+}
+
+.emptyState {
+  color: var(--gray);
+  padding: 2rem;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+}
+
+.invitationsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.invitationCard {
+  background-color: #f8fafc;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.invitationCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.invitationIcon {
+  flex: 0 0 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(36, 130, 50, 0.1);
+  border-radius: 6px;
+  color: var(--strong-green);
+  transition: transform 0.2s ease;
+}
+
+.invitationCard:hover .invitationIcon {
+  transform: scale(1.05);
+}
+
+.statusIndicator {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.statusText {
+  font-size: 0.75rem;
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.pending {
+  color: #f59e0b;
+}
+
+.accepted {
+  color: var(--strong-green);
+}
+
+.declined {
+  color: #ef4444;
+}
+
+.invitationDetails {
+  flex: 1;
+}
+
+.invitationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+}
+
+.invitationType {
+  font-weight: 600;
+  color: var(--black);
+  font-size: 0.9rem;
+}
+
+.invitationDate {
+  font-size: 0.75rem;
+  color: var(--gray);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.invitationFrom,
+.invitationInfo {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  color: var(--gray);
+  line-height: 1.4;
+}
+
+.invitationInfo {
+  font-weight: 500;
+  color: var(--black);
+}
+
+@media (max-width: 768px) {
+  .invitationsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .invitationsPreview {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .invitationCard {
+    padding: 0.75rem;
+  }
+
+  .cardHeader {
+    margin-bottom: 0.5rem;
+  }
+
+  .invitationHeader {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .invitationDate {
+    align-self: flex-end;
+  }
+}
