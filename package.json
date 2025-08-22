@@ -51,6 +51,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "geist": "^1.2.1",
+    "html2pdf.js": "^0.10.3",
     "install": "^0.13.0",
     "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",

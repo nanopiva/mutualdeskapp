@@ -79,6 +79,41 @@ export const Navbar = ({
     onDownload(blob, `${title}.json`);
   };
 
+  const onExportPDF = async () => {
+    try {
+      const el =
+        (document.querySelector(".editor-surface") as HTMLElement | null) ||
+        (document.querySelector(".tiptap") as HTMLElement | null);
+
+      if (!el) {
+        alert("Document content not found.");
+        return;
+      }
+
+      const html2pdf = (await import("html2pdf.js")).default;
+
+      const opt = {
+        margin: [10, 12, 10, 12],
+        filename: `${title || "Document"}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: {
+          mode: ["css", "legacy"],
+        },
+      } as const;
+
+      await html2pdf().set(opt).from(el).save();
+    } catch (e) {
+      console.error(e);
+      alert("We could not export the PDF.");
+    }
+  };
+
   const onSaveHTML = () => {
     if (!editor) return;
     const content = editor.getHTML();
@@ -152,6 +187,12 @@ export const Navbar = ({
     "print:hidden border border-[var(--input-border)] bg-[var(--white)] text-[var(--black)] " +
     "[&_[data-radix-menubar-item]]:text-[var(--black)]";
 
+  const triggerFix =
+    "data-[state=open]:!bg-transparent data-[state=open]:!text-[var(--black)]";
+
+  const subTriggerFix =
+    "!text-[var(--black)] data-[state=open]:!bg-[var(--gray)]/10 data-[state=open]:!text-[var(--black)]";
+
   return (
     <nav className="flex items-center justify-between">
       <div className="flex gap-2 items-center">
@@ -160,10 +201,14 @@ export const Navbar = ({
           <div className="flex">
             <Menubar className="border-none bg-transparent shadow-none h-auto p-0">
               <MenubarMenu>
-                <MenubarTrigger className={triggerBase}>File</MenubarTrigger>
+                <MenubarTrigger className={`${triggerBase} ${triggerFix}`}>
+                  File
+                </MenubarTrigger>
                 <MenubarContent className={contentBase}>
                   <MenubarSub>
-                    <MenubarSubTrigger className={itemBase}>
+                    <MenubarSubTrigger
+                      className={`${itemBase} ${subTriggerFix}`}
+                    >
                       <FileIcon className="size-4 mr-2" />
                       Save
                     </MenubarSubTrigger>
@@ -176,10 +221,7 @@ export const Navbar = ({
                         <GlobeIcon className="size-4 mr-2" />
                         HTML
                       </MenubarItem>
-                      <MenubarItem
-                        className={itemBase}
-                        onClick={() => window.print()}
-                      >
+                      <MenubarItem className={itemBase} onClick={onExportPDF}>
                         <BsFilePdf className="size-4 mr-2" />
                         PDF
                       </MenubarItem>
@@ -233,7 +275,9 @@ export const Navbar = ({
               </MenubarMenu>
 
               <MenubarMenu>
-                <MenubarTrigger className={triggerBase}>Edit</MenubarTrigger>
+                <MenubarTrigger className={`${triggerBase} ${triggerFix}`}>
+                  Edit
+                </MenubarTrigger>
                 <MenubarContent className={contentBase}>
                   <MenubarItem
                     className={itemBase}
@@ -259,10 +303,14 @@ export const Navbar = ({
               </MenubarMenu>
 
               <MenubarMenu>
-                <MenubarTrigger className={triggerBase}>Insert</MenubarTrigger>
+                <MenubarTrigger className={`${triggerBase} ${triggerFix}`}>
+                  Insert
+                </MenubarTrigger>
                 <MenubarContent className={contentBase}>
                   <MenubarSub>
-                    <MenubarSubTrigger className={itemBase}>
+                    <MenubarSubTrigger
+                      className={`${itemBase} ${subTriggerFix}`}
+                    >
                       Table
                     </MenubarSubTrigger>
                     <MenubarSubContent className={contentBase}>
@@ -296,10 +344,14 @@ export const Navbar = ({
               </MenubarMenu>
 
               <MenubarMenu>
-                <MenubarTrigger className={triggerBase}>Format</MenubarTrigger>
+                <MenubarTrigger className={`${triggerBase} ${triggerFix}`}>
+                  Format
+                </MenubarTrigger>
                 <MenubarContent className={contentBase}>
                   <MenubarSub>
-                    <MenubarSubTrigger className={itemBase}>
+                    <MenubarSubTrigger
+                      className={`${itemBase} ${subTriggerFix}`}
+                    >
                       <TextIcon className="size-4 mr-2" />
                       Text
                     </MenubarSubTrigger>

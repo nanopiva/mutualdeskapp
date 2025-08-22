@@ -6,7 +6,6 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import styles from "./page.module.css";
 
-// Wrapper que satisface el requisito de Suspense
 export default function NewProjectPage() {
   return (
     <Suspense
@@ -26,7 +25,6 @@ export default function NewProjectPage() {
   );
 }
 
-// Todo lo que usa useSearchParams vive adentro del Suspense
 function NewProjectForm() {
   const router = useRouter();
   const searchParams = useSearchParams();

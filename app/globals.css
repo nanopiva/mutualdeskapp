@@ -236,3 +236,9 @@ div[data-radix-popper-content-wrapper] {
 .ProseMirror {
   min-height: 100%;
 }
+
+.html2pdf__page-break,
+.pdf-page-break {
+  break-after: page;
+  page-break-after: always;
+}

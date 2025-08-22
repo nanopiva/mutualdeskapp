@@ -1,6 +1,12 @@
 "use client";
 
-import { ReactNode, useEffect, useMemo, useCallback, useState } from "react";
+import {
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useCallback,
+  useState,
+} from "react";
 import {
   LiveblocksProvider,
   RoomProvider,
@@ -199,15 +205,14 @@ export function Room({ children }: { children: ReactNode }) {
       >
         <ClientSideSuspense
           fallback={
-            <div
-              style={{
-                background: "var(--background)",
-                color: "var(--gray)",
-                borderBottom: "1px solid var(--input-border)",
-              }}
-              className="w-full text-sm px-4 py-2"
-            >
-              Loading… project
+            <div className="w-full flex items-center justify-center p-8 bg-[var(--white)]">
+              <div className="flex flex-col items-center gap-4">
+                <div
+                  className="loader"
+                  style={{ width: "40px", height: "40px" }}
+                />
+                <p className="text-[var(--gray)] text-sm">Loading project...</p>
+              </div>
             </div>
           }
         >

@@ -26,6 +26,89 @@ export default function ProjectCardUser({
   const [hovered, setHovered] = useState(false);
   const [snippetImage, setSnippetImage] = useState("");
 
+  const coerceContentToJSON = (raw: any): any | null => {
+    if (!raw) return null;
+
+    if (typeof raw === "string") {
+      try {
+        return JSON.parse(raw);
+      } catch {
+        const el = document.createElement("div");
+        el.innerHTML = raw;
+        const plain = (el.textContent || el.innerText || "").trim();
+
+        return plain
+          ? {
+              type: "doc",
+              content: [
+                { type: "paragraph", content: [{ type: "text", text: plain }] },
+              ],
+            }
+          : null;
+      }
+    }
+
+    return raw;
+  };
+
+  const extractTextFromContent = (raw: any): string => {
+    const json = coerceContentToJSON(raw);
+    if (!json) return "";
+
+    let out = "";
+
+    const walk = (node: any) => {
+      if (!node) return;
+
+      if (typeof node.text === "string") {
+        out += node.text;
+      }
+
+      if (node.type === "hardBreak") {
+        out += "\n";
+      }
+
+      if (Array.isArray(node.content)) {
+        if (
+          node.type === "paragraph" ||
+          node.type === "heading" ||
+          node.type === "listItem"
+        ) {
+          out += "\n";
+        }
+      }
+    };
+
+    walk(json);
+
+    return out.replace(/\s+/g, " ").trim();
+  };
+
+  const wrapText = (
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    maxWidth: number,
+    lineHeight: number
+  ) => {
+    if (!text) return [];
+    const words = text.split(" ");
+    const lines: string[] = [];
+    let currentLine = words[0] || "";
+
+    for (let i = 1; i < words.length; i++) {
+      const word = words[i];
+      const width = ctx.measureText(currentLine + " " + word).width;
+      if (width < maxWidth) {
+        currentLine += " " + word;
+      } else {
+        if (currentLine) lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+    return lines;
+  };
+
   const generateSnippetImage = () => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -34,25 +117,23 @@ export default function ProjectCardUser({
     canvas.width = 300;
     canvas.height = 180;
 
-    // Background with subtle pattern
     ctx.fillStyle = "#f8f9fa";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Add header bar
     ctx.fillStyle = isPublic ? "#d4edda" : "#f8d7da";
     ctx.fillRect(0, 0, canvas.width, 30);
 
-    // Add title
     ctx.fillStyle = "#212529";
     ctx.font = "bold 14px Arial";
     ctx.textAlign = "left";
     const title = name.length > 30 ? name.substring(0, 27) + "..." : name;
     ctx.fillText(title, 10, 20);
 
-    // Add content
     ctx.fillStyle = "#495057";
     ctx.font = "12px Arial";
-    const text = extractTextFromContent(content) || "No content yet";
+    const rawText = extractTextFromContent(content);
+    const text =
+      rawText && rawText.length > 0 ? rawText.slice(0, 600) : "No content yet";
     const lines = wrapText(ctx, text, canvas.width - 20, 14);
 
     let y = 50;
@@ -61,7 +142,6 @@ export default function ProjectCardUser({
       y += 16;
     }
 
-    // Add footer with role and privacy
     ctx.fillStyle = "#6c757d";
     ctx.font = "10px Arial";
     ctx.textAlign = "right";
@@ -74,58 +154,11 @@ export default function ProjectCardUser({
     return canvas.toDataURL("image/png");
   };
 
-  const extractTextFromContent = (content: any): string => {
-    if (!content || !content.content || !Array.isArray(content.content)) {
-      return "";
-    }
-
-    let text = "";
-
-    content.content.forEach((block: any) => {
-      if (block.content && Array.isArray(block.content)) {
-        block.content.forEach((textNode: any) => {
-          if (textNode.text && typeof textNode.text === "string") {
-            text += textNode.text;
-            if (textNode.text[textNode.text.length - 1] !== " ") {
-              text += " ";
-            }
-          }
-        });
-      }
-    });
-
-    return text.trim();
-  };
-
-  const wrapText = (
-    ctx: CanvasRenderingContext2D,
-    text: string,
-    maxWidth: number,
-    lineHeight: number
-  ) => {
-    const words = text.split(" ");
-    const lines = [];
-    let currentLine = words[0];
-
-    for (let i = 1; i < words.length; i++) {
-      const word = words[i];
-      const width = ctx.measureText(currentLine + " " + word).width;
-      if (width < maxWidth) {
-        currentLine += " " + word;
-      } else {
-        lines.push(currentLine);
-        currentLine = word;
-      }
-    }
-    lines.push(currentLine);
-    return lines;
-  };
-
   useEffect(() => {
     if (hovered) {
       setSnippetImage(generateSnippetImage());
     }
-  }, [hovered]);
+  }, [hovered, content, name, role, isPublic]);
 
   return (
     <div
